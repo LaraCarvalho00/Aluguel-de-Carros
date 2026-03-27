@@ -1,0 +1,13 @@
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\Application.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\controller\ClienteController.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\dto\request\ClienteRequestDTO.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\dto\response\ClienteResponseDTO.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\handler\ErrorResponse.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\handler\GlobalExceptionHandler.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\mapper\ClienteMapper.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\service\IClienteService.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\application\service\impl\ClienteServiceImpl.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\domain\entity\Cliente.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\domain\exception\BusinessException.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\domain\exception\ResourceNotFoundException.java
+C:\faculdade\Aluguel-de-Carros\src\main\java\com\pucminas\aluguelcarros\infrastructure\repository\ClienteRepository.java

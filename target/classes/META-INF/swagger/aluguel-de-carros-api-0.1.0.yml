@@ -1,0 +1,263 @@
+openapi: 3.0.1
+info:
+  title: Aluguel de Carros API
+  description: API REST para o sistema de gestão de aluguel de automóveis - PUC Minas
+  contact:
+    name: Equipe
+    url: https://github.com/seu-usuario/aluguel-de-carros
+  version: 0.1.0
+tags:
+- name: Clientes
+  description: Operações de CRUD para a entidade Cliente
+paths:
+  /api/v1/clientes:
+    get:
+      tags:
+      - Clientes
+      summary: Listar clientes
+      description: Retorna todos os clientes cadastrados
+      operationId: listarTodos
+      responses:
+        "200":
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClienteResponseDTO"
+    post:
+      tags:
+      - Clientes
+      summary: Cadastrar cliente
+      description: Cria um novo cliente no sistema
+      operationId: criar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteRequestDTO"
+        required: true
+      responses:
+        "201":
+          description: Cliente criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClienteResponseDTO"
+        "400":
+          description: Dados inválidos ou CPF/RG duplicado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/clientes/cpf/{cpf}:
+    get:
+      tags:
+      - Clientes
+      summary: Buscar por CPF
+      description: Retorna um cliente pelo seu CPF
+      operationId: buscarPorCpf
+      parameters:
+      - name: cpf
+        in: path
+        description: CPF do cliente (11 a 14 caracteres)
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClienteResponseDTO"
+        "404":
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/clientes/{id}:
+    get:
+      tags:
+      - Clientes
+      summary: Buscar por ID
+      description: Retorna um cliente pelo seu ID
+      operationId: buscarPorId
+      parameters:
+      - name: id
+        in: path
+        description: ID do cliente
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClienteResponseDTO"
+        "404":
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+      - Clientes
+      summary: Atualizar cliente
+      description: Atualiza os dados de um cliente existente
+      operationId: atualizar
+      parameters:
+      - name: id
+        in: path
+        description: ID do cliente
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: Cliente atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClienteResponseDTO"
+        "404":
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Dados inválidos ou CPF/RG duplicado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Clientes
+      summary: Remover cliente
+      description: Remove um cliente pelo ID
+      operationId: deletar
+      parameters:
+      - name: id
+        in: path
+        description: ID do cliente
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Cliente removido
+        "404":
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ClienteRequestDTO:
+      required:
+      - cpf
+      - endereco
+      - entidadesEmpregadoras
+      - nome
+      - profissao
+      - rendimentos
+      - rg
+      type: object
+      properties:
+        rg:
+          minLength: 1
+          type: string
+          x-size-message: RG é obrigatório
+        cpf:
+          maxLength: 14
+          minLength: 11
+          type: string
+          x-size-message: CPF deve ter entre 11 e 14 caracteres
+        nome:
+          minLength: 1
+          type: string
+          x-size-message: Nome é obrigatório
+        endereco:
+          minLength: 1
+          type: string
+          x-size-message: Endereço é obrigatório
+        profissao:
+          minLength: 1
+          type: string
+          x-size-message: Profissão é obrigatória
+        entidadesEmpregadoras:
+          maxItems: 3
+          type: array
+          items:
+            type: string
+          x-size-message: Máximo de 3 entidades empregadoras permitidas
+        rendimentos:
+          minimum: 0
+          type: number
+          x-minimum-message: Rendimentos não pode ser negativo
+          x-not-null-message: Rendimentos é obrigatório
+    ClienteResponseDTO:
+      required:
+      - cpf
+      - endereco
+      - entidadesEmpregadoras
+      - id
+      - nome
+      - profissao
+      - rendimentos
+      - rg
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        rg:
+          type: string
+        cpf:
+          type: string
+        nome:
+          type: string
+        endereco:
+          type: string
+        profissao:
+          type: string
+        entidadesEmpregadoras:
+          type: array
+          items:
+            type: string
+        rendimentos:
+          type: number
+    ErrorResponse:
+      required:
+      - error
+      - message
+      - status
+      - timestamp
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
