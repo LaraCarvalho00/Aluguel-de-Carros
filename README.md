@@ -1,250 +1,447 @@
-# Aluguel de Carros
+# Sistema de Gestao de Aluguel de Carros
 
-[![Java 17+](https://img.shields.io/badge/Java-17+-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
-[![Micronaut 4.10](https://img.shields.io/badge/Micronaut-4.10-1a1a2e?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABhSURBVDhPY/j//z8DEjYAYhYGJABSCwLIagmqBYkBMQNMIUwNiA8CKKoJqYVxkQFILVwtNmsZkBjkaomxliFodUhqsYYBLnEGJMCArpZh6EYViC+Iq5YBjUGsloGBAQA1RBkP3hIFkAAAAABJRU5ErkJggg==)](https://micronaut.io/)
-[![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?logo=apachemaven&logoColor=white)](https://maven.apache.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Micronaut](https://img.shields.io/badge/Micronaut-4.10-1A1A1A?style=for-the-badge&logo=micronaut&logoColor=white)](https://micronaut.io/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-Sistema de gestão de aluguéis de automóveis, desenvolvido como projeto acadêmico para o curso de Engenharia de Software da PUC Minas.
+Sistema web para gestao completa do ciclo de vida de alugueis de automoveis, desenvolvido para o curso de Engenharia de Software da PUC Minas.
 
 **Equipe:** Lara Andrade, Allan Mateus, Gabriel Santiago
 
 ---
 
-## Sobre
+## Indice
 
-O sistema gerencia o ciclo completo de locação de veículos, atendendo três perfis:
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Arquitetura](#arquitetura)
+- [Principios SOLID](#principios-solid)
+- [Padroes de Projeto](#padroes-de-projeto)
+- [Stack Tecnologica](#stack-tecnologica)
+- [Modelo de Dominio](#modelo-de-dominio)
+- [API Endpoints](#api-endpoints)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Como Executar](#como-executar)
+- [Diagramas UML](#diagramas-uml)
+- [Historias de Usuario](#historias-de-usuario)
+- [Sprints](#sprints)
+
+---
+
+## Sobre o Projeto
+
+O sistema atende tres perfis principais de usuarios:
 
 | Perfil | Responsabilidades |
-|---|---|
-| **Cliente** | Criar, consultar, modificar e cancelar pedidos de aluguel |
-| **Agente** | Avaliar pedidos, emitir pareceres financeiros e conceder contratos |
-| **Administrador** | Gerenciar frota de veículos, usuários e configurações |
+|--------|-------------------|
+| **Cliente** | Criar, modificar, consultar e cancelar pedidos de aluguel |
+| **Agente (Empresa/Banco)** | Avaliar pedidos financeiramente, emitir pareceres e conceder contratos de credito |
+| **Administrador** | Gerenciar usuarios, frota de veiculos e configuracoes do sistema |
 
+Sobre os contratantes, armazenam-se dados de identificacao (RG, CPF, Nome, Endereco), profissao, entidades empregadoras (maximo 3) e rendimentos. Sobre os automoveis, registram-se matricula, ano, marca, modelo e placa. Dependendo do tipo de contrato, os automoveis podem ser registrados como propriedade de clientes, empresas ou bancos.
 
 ---
 
 ## Arquitetura
 
-O projeto segue **MVC em camadas** com os padrões Repository, DTO, Entity e Facade, garantindo separação de responsabilidades e baixo acoplamento.
+O projeto segue **Clean Architecture** com separacao em camadas e inversao de dependencias. O padrao **MVC** e implementado atraves de Controllers (entrada HTTP), Services (logica de negocio) e Repositories (persistencia), orquestrados por um **Facade** central.
 
 ```
-  Apresentação        Controllers, DTOs, Validation
-       ↓
-  Aplicação           Services (Facade), Mappers, Exception Handlers
-       ↓
-  Domínio             Entities, Exceptions
-       ↓
-  Infraestrutura      Repositories, Database Config
+                    ┌──────────────────────────┐
+                    │       Controllers        │  HTTP / REST
+                    └────────────┬─────────────┘
+                                 │
+                    ┌────────────▼─────────────┐
+                    │      AluguelFacade        │  Orquestracao
+                    └────────────┬─────────────┘
+                                 │
+          ┌──────────────────────┼──────────────────────┐
+          │                      │                      │
+┌─────────▼──────────┐ ┌────────▼─────────┐ ┌──────────▼─────────┐
+│  IClienteService   │ │  IPedidoService  │ │ IAutomovelService  │
+│  IContratoService  │ │                  │ │                    │
+└─────────┬──────────┘ └────────┬─────────┘ └──────────┬─────────┘
+          │                      │                      │
+┌─────────▼──────────┐ ┌────────▼─────────┐ ┌──────────▼─────────┐
+│   ServiceImpl      │ │   ServiceImpl    │ │    ServiceImpl     │
+└─────────┬──────────┘ └────────┬─────────┘ └──────────┬─────────┘
+          │                      │                      │
+          └──────────────────────┼──────────────────────┘
+                                 │
+                    ┌────────────▼─────────────┐
+                    │      Repositories        │  Micronaut Data JPA
+                    └────────────┬─────────────┘
+                                 │
+                    ┌────────────▼─────────────┐
+                    │      H2 / PostgreSQL      │
+                    └──────────────────────────┘
 ```
 
-### Diagrama de Componentes
+### Descricao das Camadas
 
-> Diagrama completo com fluxo de sequência disponível em [`docs/DIAGRAMA_COMPONENTES.md`](docs/DIAGRAMA_COMPONENTES.md).
+| Camada | Pacote | Responsabilidade |
+|--------|--------|------------------|
+| **Apresentacao** | `application.controller` | Endpoints REST, validacao de entrada, documentacao Swagger |
+| **Aplicacao** | `application.service`, `application.facade` | Regras de aplicacao, orquestracao de fluxos via Facade |
+| **Dominio** | `domain.entity`, `domain.enums`, `domain.exception` | Entidades JPA, enums de negocio, excecoes de dominio |
+| **Infraestrutura** | `infrastructure.repository` | Persistencia de dados com Micronaut Data |
+| **Transporte** | `application.dto`, `application.mapper` | DTOs imutaveis (request/response) e conversao entre camadas |
+| **Tratamento de Erros** | `application.handler` | Exception handler global com respostas padronizadas |
+
+### Diagrama de Pacotes
+
+![Diagrama de Pacotes](docs/diagrama_pacotes.png)
 
 ---
 
-## Stack
+## Principios SOLID
 
-| Tecnologia | Versão | Papel |
-|---|---|---|
-| Java | 17 | Linguagem |
-| Micronaut | 4.10.x | Framework (HTTP server, DI, AOP) |
-| Micronaut Data JPA | 4.x | Persistência com Hibernate 6 |
-| H2 | 2.x | Banco de dados em memória (dev/test) |
-| PostgreSQL | 15+ | Banco de dados de produção (futuro) |
-| JUnit 5 | 5.x | Testes |
-| Mockito | 5.x | Mocking |
-| Maven | 3.9+ | Build e dependências |
+### S - Single Responsibility Principle
+
+Cada classe possui uma unica responsabilidade bem definida:
+
+```
+ClienteController     → Recebe requisicoes HTTP
+ClienteServiceImpl    → Executa regras de negocio
+ClienteRepository     → Persiste dados
+ClienteMapper         → Converte entre DTO e entidade
+```
+
+### O - Open/Closed Principle
+
+Novos tipos de proprietario (`TipoPropriedade`) ou status de pedido (`StatusPedido`) sao adicionados via enums sem modificar o codigo existente das classes que os utilizam.
+
+### L - Liskov Substitution Principle
+
+Todas as implementacoes de service (`ClienteServiceImpl`, `PedidoServiceImpl`, etc.) sao substituiveis por suas interfaces (`IClienteService`, `IPedidoService`), garantindo que qualquer consumidor funcione com qualquer implementacao.
+
+### I - Interface Segregation Principle
+
+Interfaces de servico segregadas por dominio, cada uma com contrato coeso:
+
+- `IClienteService` — operacoes de cliente
+- `IAutomovelService` — operacoes de automovel
+- `IPedidoService` — operacoes de pedido
+- `IContratoService` — operacoes de contrato
+
+### D - Dependency Inversion Principle
+
+Controllers e Facade dependem apenas de interfaces, nunca de implementacoes concretas. A injecao de dependencia e gerenciada pelo container do Micronaut.
+
+```java
+public class PedidoController {
+    private final AluguelFacade aluguelFacade;     // Depende da abstracao
+    private final IPedidoService pedidoService;     // Interface, nao impl
+}
+```
+
+---
+
+## Padroes de Projeto
+
+| Padrao | Tipo | Aplicacao no Projeto |
+|--------|------|----------------------|
+| **Facade** | Estrutural | `AluguelFacade` orquestra os fluxos entre pedidos, automoveis e contratos |
+| **Repository** | Estrutural | Micronaut Data `CrudRepository` abstrai toda a camada de persistencia |
+| **DTO** | Transferencia | Records imutaveis (`@Serdeable`) para request/response, desacoplados das entidades |
+| **Mapper** | Transformacao | Classes dedicadas para conversao bidirecional entre DTOs e entidades |
+| **State** | Comportamental | `StatusPedido` controla as transicoes validas do ciclo de vida do pedido |
+
+---
+
+## Stack Tecnologica
+
+### Backend
+
+| Tecnologia | Versao | Proposito |
+|------------|--------|-----------|
+| Java | 17+ | Linguagem principal |
+| Micronaut | 4.10 | Framework HTTP (Netty) |
+| Micronaut Data JPA | 4.x | Persistencia com Hibernate 6 |
+| H2 | - | Banco em memoria (desenvolvimento) |
+| PostgreSQL | 15+ | Banco relacional (producao) |
+| OpenAPI / Swagger UI | 3.x | Documentacao interativa da API |
+| JUnit 5 + Mockito | - | Testes unitarios e de integracao |
+| Maven | 3.9+ | Build e gerenciamento de dependencias |
+
+### Frontend
+
+| Tecnologia | Versao | Proposito |
+|------------|--------|-----------|
+| React | 19 | Biblioteca de UI |
+| TypeScript | 5.9 | Tipagem estatica |
+| Vite | 8.x | Build tool e dev server |
+| Axios | 1.14 | Cliente HTTP |
+| React Router | 7.x | Roteamento SPA |
+| React Hot Toast | 2.6 | Notificacoes |
+| React Icons | 5.6 | Icones |
+
+---
+
+## Modelo de Dominio
+
+### Entidades
+
+| Entidade | Campos Principais |
+|----------|-------------------|
+| **Cliente** | id, rg, cpf, nome, endereco, profissao, entidadesEmpregadoras (max 3), rendimentos |
+| **Automovel** | id, matricula, ano, marca, modelo, placa, disponivel, proprietario (CLIENTE/EMPRESA/BANCO) |
+| **Pedido** | id, cliente, automovel, status, dataInicio, dataFim, parecer, dataCriacao, dataAtualizacao |
+| **Contrato** | id, pedido, valorTotal, taxaJuros, parcelas, bancoAgente, dataCriacao |
+
+### Enumeradores
+
+| Enum | Valores |
+|------|---------|
+| `StatusPedido` | PENDENTE, EM_ANALISE, APROVADO, REPROVADO, CONTRATADO, CANCELADO |
+| `TipoPropriedade` | CLIENTE, EMPRESA, BANCO |
+
+### Ciclo de Vida do Pedido
+
+```
+  ┌──────────┐     parecer positivo     ┌───────────┐     contrato     ┌─────────────┐
+  │ PENDENTE ├─────────────────────────►│ APROVADO  ├────────────────►│ CONTRATADO  │
+  └────┬─────┘                          └─────┬─────┘                 └─────────────┘
+       │                                      │
+       │                                      │ parecer negativo
+       │                                      ▼
+       │                                ┌───────────┐
+       │                                │ REPROVADO │
+       │                                └───────────┘
+       │ cancelamento
+       ▼
+  ┌───────────┐
+  │ CANCELADO │
+  └───────────┘
+```
+
+---
+
+## API Endpoints
+
+Documentacao interativa disponivel em `http://localhost:8080/swagger-ui/index.html`
+
+### Clientes `/api/v1/clientes`
+
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `POST` | `/` | Cadastrar cliente |
+| `GET` | `/` | Listar todos |
+| `GET` | `/{id}` | Buscar por ID |
+| `GET` | `/cpf/{cpf}` | Buscar por CPF |
+| `PUT` | `/{id}` | Atualizar |
+| `DELETE` | `/{id}` | Remover |
+
+### Automoveis `/api/v1/automoveis`
+
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `POST` | `/` | Cadastrar automovel |
+| `GET` | `/` | Listar todos |
+| `GET` | `/disponiveis` | Listar disponiveis para aluguel |
+| `GET` | `/{id}` | Buscar por ID |
+| `PUT` | `/{id}` | Atualizar |
+| `DELETE` | `/{id}` | Remover |
+
+### Pedidos `/api/v1/pedidos`
+
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `POST` | `/` | Criar pedido de aluguel |
+| `GET` | `/` | Listar todos |
+| `GET` | `/{id}` | Buscar por ID |
+| `GET` | `/cliente/{clienteId}` | Listar pedidos de um cliente |
+| `PUT` | `/{id}` | Modificar pedido pendente |
+| `PATCH` | `/{id}/avaliar` | Emitir parecer financeiro (aprovar/reprovar) |
+| `PATCH` | `/{id}/cancelar` | Cancelar pedido |
+
+### Contratos `/api/v1/contratos`
+
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `POST` | `/` | Executar contrato de credito |
+| `GET` | `/` | Listar todos |
+| `GET` | `/{id}` | Buscar por ID |
+| `GET` | `/pedido/{pedidoId}` | Buscar contrato por pedido |
 
 ---
 
 ## Estrutura do Projeto
 
+### Backend
+
 ```
-src/
-├── main/java/com/pucminas/aluguelcarros/
-│   ├── Application.java
-│   ├── domain/
-│   │   ├── entity/
-│   │   │   └── Cliente.java
-│   │   └── exception/
-│   │       ├── BusinessException.java
-│   │       └── ResourceNotFoundException.java
-│   ├── application/
-│   │   ├── controller/
-│   │   │   └── ClienteController.java
-│   │   ├── dto/
-│   │   │   ├── request/ClienteRequestDTO.java
-│   │   │   └── response/ClienteResponseDTO.java
-│   │   ├── mapper/
-│   │   │   └── ClienteMapper.java
-│   │   ├── service/
-│   │   │   ├── IClienteService.java
-│   │   │   └── impl/ClienteServiceImpl.java
-│   │   └── handler/
-│   │       ├── GlobalExceptionHandler.java
-│   │       └── ErrorResponse.java
-│   └── infrastructure/
-│       └── repository/
-│           └── ClienteRepository.java
-├── main/resources/
-│   ├── application.yml
-│   └── logback.xml
-└── test/java/com/pucminas/aluguelcarros/
-    ├── unit/
-    │   └── ClienteServiceImplTest.java        (13 testes)
-    └── integration/
-        ├── ClienteControllerTest.java         (8 testes)
-        └── ClienteRepositoryTest.java         (8 testes)
+src/main/java/com/pucminas/aluguelcarros/
+├── Application.java
+├── application/
+│   ├── controller/
+│   │   ├── ClienteController.java
+│   │   ├── AutomovelController.java
+│   │   ├── PedidoController.java
+│   │   └── ContratoController.java
+│   ├── dto/
+│   │   ├── request/
+│   │   │   ├── ClienteRequestDTO.java
+│   │   │   ├── AutomovelRequestDTO.java
+│   │   │   ├── PedidoRequestDTO.java
+│   │   │   ├── ParecerRequestDTO.java
+│   │   │   └── ContratoRequestDTO.java
+│   │   └── response/
+│   │       ├── ClienteResponseDTO.java
+│   │       ├── AutomovelResponseDTO.java
+│   │       ├── PedidoResponseDTO.java
+│   │       └── ContratoResponseDTO.java
+│   ├── facade/
+│   │   └── AluguelFacade.java
+│   ├── handler/
+│   │   ├── GlobalExceptionHandler.java
+│   │   └── ErrorResponse.java
+│   ├── mapper/
+│   │   ├── ClienteMapper.java
+│   │   ├── AutomovelMapper.java
+│   │   ├── PedidoMapper.java
+│   │   └── ContratoMapper.java
+│   └── service/
+│       ├── IClienteService.java
+│       ├── IAutomovelService.java
+│       ├── IPedidoService.java
+│       ├── IContratoService.java
+│       └── impl/
+│           ├── ClienteServiceImpl.java
+│           ├── AutomovelServiceImpl.java
+│           ├── PedidoServiceImpl.java
+│           └── ContratoServiceImpl.java
+├── domain/
+│   ├── entity/
+│   │   ├── Cliente.java
+│   │   ├── Automovel.java
+│   │   ├── Pedido.java
+│   │   └── Contrato.java
+│   ├── enums/
+│   │   ├── StatusPedido.java
+│   │   └── TipoPropriedade.java
+│   └── exception/
+│       ├── BusinessException.java
+│       └── ResourceNotFoundException.java
+└── infrastructure/
+    └── repository/
+        ├── ClienteRepository.java
+        ├── AutomovelRepository.java
+        ├── PedidoRepository.java
+        └── ContratoRepository.java
+```
+
+### Frontend
+
+```
+frontend/src/
+├── components/
+│   ├── Header.tsx
+│   ├── ClienteCard.tsx
+│   ├── ClienteForm.tsx
+│   ├── AutomovelCard.tsx
+│   ├── AutomovelForm.tsx
+│   ├── PedidoCard.tsx
+│   ├── ParecerModal.tsx
+│   └── ConfirmModal.tsx
+├── pages/
+│   ├── Home.tsx
+│   ├── ClienteListPage.tsx
+│   ├── ClienteCreatePage.tsx
+│   ├── ClienteEditPage.tsx
+│   ├── ClienteSearchPage.tsx
+│   ├── AutomovelListPage.tsx
+│   ├── AutomovelCreatePage.tsx
+│   ├── AutomovelEditPage.tsx
+│   ├── PedidoListPage.tsx
+│   └── PedidoCreatePage.tsx
+├── services/
+│   └── api.ts
+├── types/
+│   ├── cliente.ts
+│   ├── automovel.ts
+│   └── pedido.ts
+├── utils/
+│   └── error.ts
+├── App.tsx
+├── main.tsx
+└── index.css
 ```
 
 ---
 
-## Executando
+## Como Executar
 
-### Pré-requisitos
+### Pre-requisitos
 
 - JDK 17+
-- `JAVA_HOME` configurado (ex: `C:\Program Files\Java\jdk-17`)
+- Node.js 18+
+- Maven 3.9+ (wrapper incluso no projeto)
 
-> Maven **não** precisa estar instalado globalmente. O projeto inclui o Maven Wrapper (`mvnw`).
-
-### Subir a aplicação
+### Backend
 
 ```bash
-# Windows
-set JAVA_HOME=C:\Program Files\Java\jdk-17
-.\mvnw.cmd mn:run
-
-# Linux/Mac
-export JAVA_HOME=/usr/lib/jvm/java-17
 ./mvnw mn:run
 ```
 
-A aplicação sobe em `http://localhost:8080` com banco H2 em memória.
+Inicia na porta `8080` com banco H2 em memoria. Swagger UI disponivel em `/swagger-ui/index.html`.
 
-### Executar testes
-
-```bash
-.\mvnw.cmd test
-```
-
-29 testes (13 unitários + 16 integração) rodando contra H2 in-memory.
-
-### Gerar JAR
+### Frontend
 
 ```bash
-.\mvnw.cmd clean package -DskipTests
-java -jar target/aluguel-de-carros-0.1.0.jar
+cd frontend
+npm install
+npm run dev
+```
+
+Inicia na porta `3000` com proxy configurado para o backend.
+
+### Testes
+
+```bash
+./mvnw test
 ```
 
 ---
 
-## API
+## Diagramas UML
 
-Base URL: `http://localhost:8080/api/v1`
+Disponiveis no diretorio `/docs`:
 
-### Clientes
-
-| Verbo | Rota | Status | Descrição |
-|---|---|---|---|
-| `POST` | `/clientes` | `201` | Cadastra cliente |
-| `GET` | `/clientes` | `200` | Lista todos |
-| `GET` | `/clientes/{id}` | `200` | Busca por ID |
-| `GET` | `/clientes/cpf/{cpf}` | `200` | Busca por CPF |
-| `PUT` | `/clientes/{id}` | `200` | Atualiza cliente |
-| `DELETE` | `/clientes/{id}` | `204` | Remove cliente |
-
-### Exemplo de request
-
-```json
-POST /api/v1/clientes
-Content-Type: application/json
-
-{
-  "rg": "MG-12.345.678",
-  "cpf": "12345678901",
-  "nome": "João Silva",
-  "endereco": "Rua das Flores, 123 - BH/MG",
-  "profissao": "Engenheiro de Software",
-  "entidadesEmpregadoras": ["TechCorp", "ConsultaLtda"],
-  "rendimentos": 8500.00
-}
-```
-
-### Validações
-
-- `rg`, `cpf`, `nome`, `endereco`, `profissao` e `rendimentos` são obrigatórios
-- `cpf` deve ter entre 11 e 14 caracteres
-- `entidadesEmpregadoras` aceita no máximo 3 itens
-- `rendimentos` deve ser >= 0
-- CPF e RG devem ser únicos no sistema
-
-### Respostas de erro
-
-```json
-{
-  "status": 400,
-  "error": "Bad Request",
-  "message": "Já existe um cliente cadastrado com o CPF: 12345678901",
-  "timestamp": "2026-03-27T19:15:00"
-}
-```
+| Diagrama | Descricao |
+|----------|-----------|
+| Casos de Uso | Interacoes entre atores e funcionalidades |
+| Classes | Estrutura de dados e relacionamentos do dominio |
+| Pacotes (Visao Logica) | Organizacao em camadas da arquitetura |
+| Componentes | Modulos do sistema e suas dependencias |
 
 ---
 
-## Princípios e Padrões
+## Historias de Usuario
 
-O projeto aplica **SOLID** na prática:
+Documentadas em [`HISTORIAS_USUARIO.md`](HISTORIAS_USUARIO.md), cobrindo:
 
-- **SRP** -- cada classe tem uma responsabilidade: Controller lida com HTTP, Service com regras de negócio, Repository com persistência, Mapper com conversão
-- **OCP** -- novas entidades podem ser adicionadas sem alterar as existentes
-- **LSP** -- a interface `IClienteService` permite substituir implementações sem quebrar o controller
-- **ISP** -- interfaces focadas (`IClienteService` não expõe operações de outros domínios)
-- **DIP** -- o controller depende da abstração `IClienteService`, não da implementação concreta
-
-Padrões utilizados: **Repository**, **DTO**, **Facade** (service como fachada de negócio), **Mapper**.
-
----
-
-## Documentação
-
-| Documento | Caminho |
-|---|---|
-| Histórias de Usuário | [`HISTORIAS_USUARIO.md`](HISTORIAS_USUARIO.md) |
-| Diagrama de Componentes (detalhado) | [`docs/DIAGRAMA_COMPONENTES.md`](docs/DIAGRAMA_COMPONENTES.md) |
-| Diagrama de Componentes do Sistema | [`docs/diagrama_componentes_sistema.png`](docs/diagrama_componentes_sistema.png) |
-
-### Visão Geral do Sistema
-
-![Diagrama de Componentes do Sistema](docs/diagrama_componentes_sistema.png)
+| Grupo | Historias | Descricao |
+|-------|-----------|-----------|
+| Cadastro e Autenticacao | US01 - US03 | Registro de clientes e acesso ao sistema |
+| Fluxo de Aluguel | US04 - US06 | Solicitacao, gestao e acompanhamento de pedidos |
+| Gestao e Aprovacao | US07 - US09 | Avaliacao financeira e execucao de contratos |
+| Financiamento | US10 - US11 | Concessao e associacao de contratos de credito |
+| Gestao de Frota | US12 | Manutencao dos dados de automoveis |
 
 ---
 
-## Contribuição
+## Sprints
 
-1. Crie uma branch a partir de `develop`: `git checkout -b feature/minha-feature`
-2. Implemente com testes
-3. Rode `.\mvnw.cmd test` e garanta que tudo passa
-4. Use commits semânticos: `feat(cliente): adiciona busca por CPF`
-5. Abra um Pull Request para `develop`
-
-| Prefixo | Uso |
-|---|---|
-| `feat` | Nova funcionalidade |
-| `fix` | Correção de bug |
-| `refactor` | Refatoração sem mudança de comportamento |
-| `test` | Adição ou correção de testes |
-| `docs` | Documentação |
-| `chore` | Tarefas de manutenção |
+| Sprint | Entregaveis |
+|--------|-------------|
+| **Lab02S01** | Diagrama de Casos de Uso, Historias de Usuario, Diagrama de Classes, Diagrama de Pacotes |
+| **Lab02S02** | Revisao dos diagramas + Diagrama de Componentes + CRUD de Cliente (web, Java, MVC) |
+| **Lab02S03** | Revisao dos diagramas + Diagrama de Implantacao + Prototipo completo com pedidos de aluguel |
 
 ---
-
-## Licença
-
-[MIT](LICENSE)
 
 <p align="center">
-  PUC Minas -- Engenharia de Software
+  <strong>PUC Minas</strong> — Laboratorio de Desenvolvimento de Software
 </p>

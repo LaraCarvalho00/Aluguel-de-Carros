@@ -1,5 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { FiUsers, FiHome, FiUserPlus, FiSearch } from "react-icons/fi";
+import {
+  FiHome,
+  FiUsers,
+  FiUserPlus,
+  FiSearch,
+  FiTruck,
+  FiFileText,
+} from "react-icons/fi";
 
 export default function Header() {
   const { pathname } = useLocation();
@@ -9,6 +16,8 @@ export default function Header() {
     { to: "/clientes", label: "Clientes", icon: <FiUsers /> },
     { to: "/clientes/novo", label: "Cadastrar", icon: <FiUserPlus /> },
     { to: "/clientes/buscar", label: "Buscar CPF", icon: <FiSearch /> },
+    { to: "/automoveis", label: "Automóveis", icon: <FiTruck /> },
+    { to: "/pedidos", label: "Pedidos", icon: <FiFileText /> },
   ];
 
   return (

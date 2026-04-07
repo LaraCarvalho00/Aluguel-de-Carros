@@ -34,8 +34,8 @@ public class Application {
 
     @EventListener
     public void onStartup(StartupEvent event) {
-        String url = server.getURL() + "/swagger-ui/index.html";
         try {
+            String url = server.getURL() + "/swagger-ui/index.html";
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 Desktop.getDesktop().browse(new URI(url));
             }

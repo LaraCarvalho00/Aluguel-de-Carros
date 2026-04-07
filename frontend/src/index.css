@@ -1,4 +1,3 @@
-/* ===== CSS Variables ===== */
 :root {
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
@@ -25,7 +24,6 @@
   --transition: 0.2s ease;
 }
 
-/* ===== Reset ===== */
 *,
 *::before,
 *::after {
@@ -43,7 +41,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== Header ===== */
 .header {
   background: white;
   border-bottom: 1px solid var(--gray-200);
@@ -105,14 +102,12 @@ body {
   color: var(--primary);
 }
 
-/* ===== Container ===== */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
 
-/* ===== Page ===== */
 .page-header {
   display: flex;
   align-items: center;
@@ -133,7 +128,6 @@ body {
   margin-bottom: 1.5rem;
 }
 
-/* ===== Home ===== */
 .hero {
   text-align: center;
   padding: 3rem 0;
@@ -196,14 +190,12 @@ body {
   color: var(--gray-500);
 }
 
-/* ===== Cards Grid ===== */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.25rem;
 }
 
-/* ===== Card ===== */
 .card {
   background: white;
   border: 1px solid var(--gray-200);
@@ -352,7 +344,6 @@ body {
   border-top: 1px solid var(--gray-100);
 }
 
-/* ===== Buttons ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -405,6 +396,15 @@ body {
   background: var(--danger-hover);
 }
 
+.btn-success {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #15803d;
+}
+
 .btn-block {
   width: 100%;
   justify-content: center;
@@ -413,7 +413,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* ===== Form ===== */
 .form {
   background: white;
   border: 1px solid var(--gray-200);
@@ -467,6 +466,53 @@ body {
   color: var(--gray-400);
 }
 
+.form-select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  color: var(--gray-800);
+  background: white;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-textarea {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  color: var(--gray-800);
+  background: white;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.form-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-textarea::placeholder {
+  color: var(--gray-400);
+}
+
 .entidade-input-row {
   display: flex;
   gap: 0.5rem;
@@ -484,7 +530,6 @@ body {
   min-height: 1.5rem;
 }
 
-/* ===== Search ===== */
 .search-form {
   display: flex;
   gap: 0.75rem;
@@ -500,7 +545,6 @@ body {
   max-width: 440px;
 }
 
-/* ===== Empty State ===== */
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
@@ -518,7 +562,6 @@ body {
   color: var(--gray-500);
 }
 
-/* ===== Loading ===== */
 .loading {
   text-align: center;
   padding: 4rem 2rem;
@@ -526,7 +569,6 @@ body {
   font-size: 1rem;
 }
 
-/* ===== Modal ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -576,7 +618,99 @@ body {
   justify-content: center;
 }
 
-/* ===== Responsive ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.status-disponivel {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-indisponivel {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-pendente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-analise {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-aprovado {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-reprovado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-contratado {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.status-cancelado {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.auto-avatar {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.pedido-avatar {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.parecer-field {
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 0.25rem !important;
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--gray-100);
+}
+
+.parecer-field .value {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--gray-500);
+}
+
+.parecer-modal {
+  max-width: 500px;
+  text-align: left;
+}
+
+.parecer-modal h3 {
+  text-align: center;
+}
+
+.parecer-modal p {
+  text-align: center;
+}
+
+.parecer-modal .form-group {
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 768px) {
   .header-inner {
     flex-direction: column;

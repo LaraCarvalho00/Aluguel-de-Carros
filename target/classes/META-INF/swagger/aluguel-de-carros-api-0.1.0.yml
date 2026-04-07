@@ -7,16 +7,163 @@ info:
     url: https://github.com/seu-usuario/aluguel-de-carros
   version: 0.1.0
 tags:
+- name: Automóveis
+  description: Operações de CRUD para a entidade Automóvel
 - name: Clientes
   description: Operações de CRUD para a entidade Cliente
+- name: Contratos
+  description: Operações de gestão de contratos de crédito
+- name: Pedidos
+  description: Operações de gestão de pedidos de aluguel
 paths:
+  /api/v1/automoveis:
+    get:
+      tags:
+      - Automóveis
+      summary: Listar automóveis
+      description: Retorna todos os automóveis cadastrados
+      operationId: listarTodos
+      responses:
+        "200":
+          description: Lista de automóveis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AutomovelResponseDTO"
+    post:
+      tags:
+      - Automóveis
+      summary: Cadastrar automóvel
+      description: Registra um novo automóvel na frota
+      operationId: criar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutomovelRequestDTO"
+        required: true
+      responses:
+        "201":
+          description: Automóvel criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomovelResponseDTO"
+        "400":
+          description: Dados inválidos ou placa/matrícula duplicada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/automoveis/disponiveis:
+    get:
+      tags:
+      - Automóveis
+      summary: Listar disponíveis
+      description: Retorna automóveis disponíveis para aluguel
+      operationId: listarDisponiveis
+      responses:
+        "200":
+          description: Lista de automóveis disponíveis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AutomovelResponseDTO"
+  /api/v1/automoveis/{id}:
+    get:
+      tags:
+      - Automóveis
+      summary: Buscar por ID
+      description: Retorna um automóvel pelo seu ID
+      operationId: buscarPorId
+      parameters:
+      - name: id
+        in: path
+        description: ID do automóvel
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Automóvel encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomovelResponseDTO"
+        "404":
+          description: Automóvel não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+      - Automóveis
+      summary: Atualizar automóvel
+      description: Atualiza os dados de um automóvel
+      operationId: atualizar
+      parameters:
+      - name: id
+        in: path
+        description: ID do automóvel
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutomovelRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: Automóvel atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomovelResponseDTO"
+        "404":
+          description: Automóvel não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Automóveis
+      summary: Remover automóvel
+      description: Remove um automóvel pelo ID
+      operationId: deletar
+      parameters:
+      - name: id
+        in: path
+        description: ID do automóvel
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Automóvel removido
+        "404":
+          description: Automóvel não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/clientes:
     get:
       tags:
       - Clientes
       summary: Listar clientes
       description: Retorna todos os clientes cadastrados
-      operationId: listarTodos
+      operationId: listarTodos_1
       responses:
         "200":
           description: Lista de clientes
@@ -31,7 +178,7 @@ paths:
       - Clientes
       summary: Cadastrar cliente
       description: Cria um novo cliente no sistema
-      operationId: criar
+      operationId: criar_1
       requestBody:
         content:
           application/json:
@@ -84,7 +231,7 @@ paths:
       - Clientes
       summary: Buscar por ID
       description: Retorna um cliente pelo seu ID
-      operationId: buscarPorId
+      operationId: buscarPorId_1
       parameters:
       - name: id
         in: path
@@ -111,7 +258,7 @@ paths:
       - Clientes
       summary: Atualizar cliente
       description: Atualiza os dados de um cliente existente
-      operationId: atualizar
+      operationId: atualizar_1
       parameters:
       - name: id
         in: path
@@ -150,7 +297,7 @@ paths:
       - Clientes
       summary: Remover cliente
       description: Remove um cliente pelo ID
-      operationId: deletar
+      operationId: deletar_1
       parameters:
       - name: id
         in: path
@@ -168,8 +315,359 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/contratos:
+    get:
+      tags:
+      - Contratos
+      summary: Listar contratos
+      description: Retorna todos os contratos
+      operationId: listarTodos_2
+      responses:
+        "200":
+          description: Lista de contratos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContratoResponseDTO"
+    post:
+      tags:
+      - Contratos
+      summary: Executar contrato
+      description: Cria um contrato de crédito para pedido aprovado
+      operationId: criar_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContratoRequestDTO"
+        required: true
+      responses:
+        "201":
+          description: Contrato criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContratoResponseDTO"
+        "400":
+          description: Pedido não aprovado ou contrato já existente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/contratos/pedido/{pedidoId}:
+    get:
+      tags:
+      - Contratos
+      summary: Buscar por pedido
+      description: Retorna o contrato associado a um pedido
+      operationId: buscarPorPedido
+      parameters:
+      - name: pedidoId
+        in: path
+        description: ID do pedido
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Contrato encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContratoResponseDTO"
+        "404":
+          description: Contrato não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/contratos/{id}:
+    get:
+      tags:
+      - Contratos
+      summary: Buscar por ID
+      description: Retorna um contrato pelo seu ID
+      operationId: buscarPorId_2
+      parameters:
+      - name: id
+        in: path
+        description: ID do contrato
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Contrato encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContratoResponseDTO"
+        "404":
+          description: Contrato não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/pedidos:
+    get:
+      tags:
+      - Pedidos
+      summary: Listar pedidos
+      description: Retorna todos os pedidos de aluguel
+      operationId: listarTodos_3
+      responses:
+        "200":
+          description: Lista de pedidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PedidoResponseDTO"
+    post:
+      tags:
+      - Pedidos
+      summary: Criar pedido
+      description: Cria um novo pedido de aluguel
+      operationId: criar_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PedidoRequestDTO"
+        required: true
+      responses:
+        "201":
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PedidoResponseDTO"
+        "400":
+          description: Dados inválidos ou automóvel indisponível
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/pedidos/cliente/{clienteId}:
+    get:
+      tags:
+      - Pedidos
+      summary: Listar por cliente
+      description: Retorna todos os pedidos de um cliente
+      operationId: listarPorCliente
+      parameters:
+      - name: clienteId
+        in: path
+        description: ID do cliente
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Lista de pedidos do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PedidoResponseDTO"
+  /api/v1/pedidos/{id}:
+    get:
+      tags:
+      - Pedidos
+      summary: Buscar por ID
+      description: Retorna um pedido pelo seu ID
+      operationId: buscarPorId_3
+      parameters:
+      - name: id
+        in: path
+        description: ID do pedido
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Pedido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PedidoResponseDTO"
+        "404":
+          description: Pedido não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+      - Pedidos
+      summary: Atualizar pedido
+      description: Modifica um pedido pendente
+      operationId: atualizar_2
+      parameters:
+      - name: id
+        in: path
+        description: ID do pedido
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PedidoRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: Pedido atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PedidoResponseDTO"
+        "400":
+          description: Pedido não pode ser modificado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/pedidos/{id}/avaliar:
+    patch:
+      tags:
+      - Pedidos
+      summary: Avaliar pedido
+      description: Emite parecer financeiro sobre o pedido (aprovar/reprovar)
+      operationId: avaliar
+      parameters:
+      - name: id
+        in: path
+        description: ID do pedido
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParecerRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: Pedido avaliado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PedidoResponseDTO"
+        "400":
+          description: Pedido não pode ser avaliado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/pedidos/{id}/cancelar:
+    patch:
+      tags:
+      - Pedidos
+      summary: Cancelar pedido
+      description: Cancela um pedido de aluguel
+      operationId: cancelar
+      parameters:
+      - name: id
+        in: path
+        description: ID do pedido
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Pedido cancelado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PedidoResponseDTO"
+        "400":
+          description: Pedido não pode ser cancelado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    AutomovelRequestDTO:
+      required:
+      - ano
+      - marca
+      - matricula
+      - modelo
+      - placa
+      - proprietario
+      type: object
+      properties:
+        matricula:
+          minLength: 1
+          type: string
+          x-size-message: Matrícula é obrigatória
+        ano:
+          maximum: 2030
+          minimum: 1900
+          type: integer
+          format: int32
+          x-maximum-message: Ano inválido
+          x-minimum-message: Ano deve ser maior que 1900
+          x-not-null-message: Ano é obrigatório
+        marca:
+          minLength: 1
+          type: string
+          x-size-message: Marca é obrigatória
+        modelo:
+          minLength: 1
+          type: string
+          x-size-message: Modelo é obrigatório
+        placa:
+          minLength: 1
+          type: string
+          x-size-message: Placa é obrigatória
+        proprietario:
+          type: string
+    AutomovelResponseDTO:
+      required:
+      - ano
+      - disponivel
+      - id
+      - marca
+      - matricula
+      - modelo
+      - placa
+      - proprietario
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        matricula:
+          type: string
+        ano:
+          type: integer
+          format: int32
+        marca:
+          type: string
+        modelo:
+          type: string
+        placa:
+          type: string
+        disponivel:
+          type: boolean
+        proprietario:
+          type: string
     ClienteRequestDTO:
       required:
       - cpf
@@ -244,6 +742,73 @@ components:
             type: string
         rendimentos:
           type: number
+    ContratoRequestDTO:
+      required:
+      - bancoAgente
+      - parcelas
+      - pedidoId
+      - taxaJuros
+      - valorTotal
+      type: object
+      properties:
+        pedidoId:
+          type: integer
+          format: int64
+          x-not-null-message: ID do pedido é obrigatório
+        valorTotal:
+          minimum: 0.01
+          type: number
+          x-minimum-message: Valor total deve ser positivo
+          x-not-null-message: Valor total é obrigatório
+        taxaJuros:
+          minimum: 0
+          type: number
+          x-minimum-message: Taxa de juros não pode ser negativa
+          x-not-null-message: Taxa de juros é obrigatória
+        parcelas:
+          minimum: 1
+          type: integer
+          format: int32
+          x-minimum-message: Mínimo de 1 parcela
+          x-not-null-message: Número de parcelas é obrigatório
+        bancoAgente:
+          minLength: 1
+          type: string
+          x-size-message: Banco agente é obrigatório
+    ContratoResponseDTO:
+      required:
+      - automovelDescricao
+      - bancoAgente
+      - clienteNome
+      - dataCriacao
+      - id
+      - parcelas
+      - pedidoId
+      - taxaJuros
+      - valorTotal
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        pedidoId:
+          type: integer
+          format: int64
+        clienteNome:
+          type: string
+        automovelDescricao:
+          type: string
+        valorTotal:
+          type: number
+        taxaJuros:
+          type: number
+        parcelas:
+          type: integer
+          format: int32
+        bancoAgente:
+          type: string
+        dataCriacao:
+          type: string
     ErrorResponse:
       required:
       - error
@@ -260,4 +825,82 @@ components:
         message:
           type: string
         timestamp:
+          type: string
+    ParecerRequestDTO:
+      required:
+      - aprovado
+      - parecer
+      type: object
+      properties:
+        aprovado:
+          type: boolean
+          x-not-null-message: Aprovação é obrigatória
+        parecer:
+          minLength: 1
+          type: string
+          x-size-message: Parecer é obrigatório
+    PedidoRequestDTO:
+      required:
+      - automovelId
+      - clienteId
+      - dataFim
+      - dataInicio
+      type: object
+      properties:
+        clienteId:
+          type: integer
+          format: int64
+          x-not-null-message: ID do cliente é obrigatório
+        automovelId:
+          type: integer
+          format: int64
+          x-not-null-message: ID do automóvel é obrigatório
+        dataInicio:
+          type: string
+          x-not-null-message: Data de início é obrigatória
+        dataFim:
+          type: string
+          x-not-null-message: Data de fim é obrigatória
+    PedidoResponseDTO:
+      required:
+      - automovelDescricao
+      - automovelId
+      - clienteId
+      - clienteNome
+      - dataAtualizacao
+      - dataCriacao
+      - dataFim
+      - dataInicio
+      - id
+      - parecer
+      - status
+      - statusDescricao
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        clienteId:
+          type: integer
+          format: int64
+        clienteNome:
+          type: string
+        automovelId:
+          type: integer
+          format: int64
+        automovelDescricao:
+          type: string
+        status:
+          type: string
+        statusDescricao:
+          type: string
+        dataInicio:
+          type: string
+        dataFim:
+          type: string
+        parecer:
+          type: string
+        dataCriacao:
+          type: string
+        dataAtualizacao:
           type: string

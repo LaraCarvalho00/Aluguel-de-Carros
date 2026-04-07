@@ -26,23 +26,4 @@ jpa:
       hibernate:
         hbm2ddl:
           auto: update
-        show_sql: true
-
-# -----------------------------------------------------------
-# Configuracao PostgreSQL (descomentar para uso em producao)
-# -----------------------------------------------------------
-# datasources:
-#   default:
-#     url: jdbc:postgresql://localhost:5432/aluguelcarros
-#     driverClassName: org.postgresql.Driver
-#     username: postgres
-#     password: postgres
-#     dialect: POSTGRES
-#
-# jpa:
-#   default:
-#     properties:
-#       hibernate:
-#         hbm2ddl:
-#           auto: update
-#         show_sql: false
+        show_sql: false
