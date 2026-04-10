@@ -6,8 +6,11 @@ import { clienteService } from "../services/api";
 import type { ClienteResponse } from "../types/cliente";
 import ClienteCard from "../components/ClienteCard";
 import ConfirmModal from "../components/ConfirmModal";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function ClienteListPage() {
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole("ADMIN");
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -52,19 +55,25 @@ export default function ClienteListPage() {
     <div className="page">
       <div className="page-header">
         <h1>Clientes Cadastrados</h1>
-        <Link to="/clientes/novo" className="btn btn-primary">
-          <FiUserPlus size={16} /> Novo Cliente
-        </Link>
+        {isAdmin && (
+          <Link to="/clientes/novo" className="btn btn-primary">
+            <FiUserPlus size={16} /> Novo Cliente
+          </Link>
+        )}
       </div>
 
       {clientes.length === 0 ? (
         <div className="empty-state">
           <FiInbox size={48} />
           <h2>Nenhum cliente cadastrado</h2>
-          <p>Comece cadastrando seu primeiro cliente.</p>
-          <Link to="/clientes/novo" className="btn btn-primary">
-            Cadastrar Cliente
-          </Link>
+          {isAdmin && (
+            <>
+              <p>Comece cadastrando seu primeiro cliente.</p>
+              <Link to="/clientes/novo" className="btn btn-primary">
+                Cadastrar Cliente
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="cards-grid">

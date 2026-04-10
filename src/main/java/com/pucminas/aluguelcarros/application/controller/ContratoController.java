@@ -12,6 +12,8 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Status;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.validation.Validated;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +26,7 @@ import java.util.List;
 
 @Controller("/api/v1/contratos")
 @Validated
+@Secured(SecurityRule.IS_AUTHENTICATED)
 @Tag(name = "Contratos", description = "Operações de gestão de contratos de crédito")
 public class ContratoController {
 
@@ -37,6 +40,7 @@ public class ContratoController {
 
     @Post
     @Status(HttpStatus.CREATED)
+    @Secured({"AGENTE", "ADMIN"})
     @Operation(summary = "Executar contrato", description = "Cria um contrato de crédito para pedido aprovado")
     @ApiResponse(responseCode = "201", description = "Contrato criado com sucesso",
             content = @Content(schema = @Schema(implementation = ContratoResponseDTO.class)))

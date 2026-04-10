@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FiEdit2, FiTrash2, FiTruck } from "react-icons/fi";
 import type { AutomovelResponse } from "../types/automovel";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
   automovel: AutomovelResponse;
@@ -9,6 +10,8 @@ interface Props {
 
 export default function AutomovelCard({ automovel, onDelete }: Props) {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole("ADMIN");
 
   return (
     <div className="card">
@@ -50,20 +53,22 @@ export default function AutomovelCard({ automovel, onDelete }: Props) {
         </div>
       </div>
 
-      <div className="card-actions">
-        <button
-          className="btn btn-sm btn-primary"
-          onClick={() => navigate(`/automoveis/editar/${automovel.id}`)}
-        >
-          <FiEdit2 size={14} /> Editar
-        </button>
-        <button
-          className="btn btn-sm btn-danger"
-          onClick={() => onDelete(automovel.id)}
-        >
-          <FiTrash2 size={14} /> Excluir
-        </button>
-      </div>
+      {isAdmin && (
+        <div className="card-actions">
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={() => navigate(`/automoveis/editar/${automovel.id}`)}
+          >
+            <FiEdit2 size={14} /> Editar
+          </button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={() => onDelete(automovel.id)}
+          >
+            <FiTrash2 size={14} /> Excluir
+          </button>
+        </div>
+      )}
     </div>
   );
 }

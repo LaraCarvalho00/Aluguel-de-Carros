@@ -3,6 +3,35 @@ micronaut:
     name: aluguel-de-carros
   server:
     port: 8080
+  security:
+    enabled: true
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: "${JWT_SECRET:AluguelCarrosSecretKeyPUCMinas2024SuperLonga!!}"
+        generator:
+          access-token:
+            expiration: 86400
+    endpoints:
+      login:
+        enabled: true
+        path: /api/v1/auth/login
+      logout:
+        enabled: false
+    intercept-url-map:
+      - pattern: /swagger-ui/**
+        access:
+          - isAnonymous()
+      - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /api/v1/auth/registro
+        http-method: POST
+        access:
+          - isAnonymous()
   router:
     static-resources:
       swagger:
@@ -14,10 +43,10 @@ micronaut:
 
 datasources:
   default:
-    url: ${URL_BD:jdbc:postgresql://localhost:5433/mydatabase}
+    url: ${URL_BD}
     driverClassName: org.postgresql.Driver
-    username: ${USER_BD:postgres}
-    password: ${PASSWORD_BD:1234567}
+    username: ${USER_BD}
+    password: ${PASSWORD_BD}
     dialect: POSTGRESQL
 
 jpa:

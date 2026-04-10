@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FiEdit2, FiTrash2, FiUser, FiBriefcase, FiMapPin } from "react-icons/fi";
 import type { ClienteResponse } from "../types/cliente";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
   cliente: ClienteResponse;
@@ -9,6 +10,8 @@ interface Props {
 
 export default function ClienteCard({ cliente, onDelete }: Props) {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole("ADMIN");
   const entidades = cliente.entidadesEmpregadoras ?? [];
 
   const formatCurrency = (value: number) =>
@@ -56,20 +59,22 @@ export default function ClienteCard({ cliente, onDelete }: Props) {
         </div>
       </div>
 
-      <div className="card-actions">
-        <button
-          className="btn btn-sm btn-primary"
-          onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
-        >
-          <FiEdit2 size={14} /> Editar
-        </button>
-        <button
-          className="btn btn-sm btn-danger"
-          onClick={() => onDelete(cliente.id)}
-        >
-          <FiTrash2 size={14} /> Excluir
-        </button>
-      </div>
+      {isAdmin && (
+        <div className="card-actions">
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
+          >
+            <FiEdit2 size={14} /> Editar
+          </button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={() => onDelete(cliente.id)}
+          >
+            <FiTrash2 size={14} /> Excluir
+          </button>
+        </div>
+      )}
     </div>
   );
 }

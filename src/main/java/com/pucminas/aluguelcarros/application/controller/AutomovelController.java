@@ -13,6 +13,8 @@ import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Put;
 import io.micronaut.http.annotation.Status;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.validation.Validated;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,6 +27,7 @@ import java.util.List;
 
 @Controller("/api/v1/automoveis")
 @Validated
+@Secured(SecurityRule.IS_AUTHENTICATED)
 @Tag(name = "Automóveis", description = "Operações de CRUD para a entidade Automóvel")
 public class AutomovelController {
 
@@ -36,6 +39,7 @@ public class AutomovelController {
 
     @Post
     @Status(HttpStatus.CREATED)
+    @Secured({"ADMIN"})
     @Operation(summary = "Cadastrar automóvel", description = "Registra um novo automóvel na frota")
     @ApiResponse(responseCode = "201", description = "Automóvel criado com sucesso",
             content = @Content(schema = @Schema(implementation = AutomovelResponseDTO.class)))
@@ -46,6 +50,7 @@ public class AutomovelController {
     }
 
     @Get
+    @Secured({"AGENTE", "ADMIN"})
     @Operation(summary = "Listar automóveis", description = "Retorna todos os automóveis cadastrados")
     @ApiResponse(responseCode = "200", description = "Lista de automóveis")
     public List<AutomovelResponseDTO> listarTodos() {
@@ -71,6 +76,7 @@ public class AutomovelController {
     }
 
     @Put("/{id}")
+    @Secured({"ADMIN"})
     @Operation(summary = "Atualizar automóvel", description = "Atualiza os dados de um automóvel")
     @ApiResponse(responseCode = "200", description = "Automóvel atualizado",
             content = @Content(schema = @Schema(implementation = AutomovelResponseDTO.class)))
@@ -84,6 +90,7 @@ public class AutomovelController {
 
     @Delete("/{id}")
     @Status(HttpStatus.NO_CONTENT)
+    @Secured({"ADMIN"})
     @Operation(summary = "Remover automóvel", description = "Remove um automóvel pelo ID")
     @ApiResponse(responseCode = "204", description = "Automóvel removido")
     @ApiResponse(responseCode = "404", description = "Automóvel não encontrado",

@@ -6,28 +6,34 @@ import { automovelService } from "../services/api";
 import type { AutomovelResponse } from "../types/automovel";
 import AutomovelCard from "../components/AutomovelCard";
 import ConfirmModal from "../components/ConfirmModal";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function AutomovelListPage() {
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole("ADMIN");
+  const isCliente = hasRole("CLIENTE");
   const [automoveis, setAutomoveis] = useState<AutomovelResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchAutomoveis = async () => {
-    try {
-      setLoading(true);
-      const { data } = await automovelService.listarTodos();
-      setAutomoveis(data);
-    } catch {
-      toast.error("Erro ao carregar automóveis.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchAutomoveis = async () => {
+      try {
+        setLoading(true);
+        // CLIENTE vê apenas disponíveis; AGENTE e ADMIN veem todos
+        const { data } = isCliente
+          ? await automovelService.listarDisponiveis()
+          : await automovelService.listarTodos();
+        setAutomoveis(data);
+      } catch {
+        toast.error("Erro ao carregar automóveis.");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchAutomoveis();
-  }, []);
+  }, [isCliente]);
 
   const handleDelete = async () => {
     if (deleteId === null) return;
@@ -51,20 +57,30 @@ export default function AutomovelListPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1>Frota de Automóveis</h1>
-        <Link to="/automoveis/novo" className="btn btn-primary">
-          <FiPlus size={16} /> Novo Automóvel
-        </Link>
+        <h1>{isCliente ? "Automóveis Disponíveis" : "Frota de Automóveis"}</h1>
+        {isAdmin && (
+          <Link to="/automoveis/novo" className="btn btn-primary">
+            <FiPlus size={16} /> Novo Automóvel
+          </Link>
+        )}
       </div>
 
       {automoveis.length === 0 ? (
         <div className="empty-state">
           <FiInbox size={48} />
-          <h2>Nenhum automóvel cadastrado</h2>
-          <p>Comece cadastrando o primeiro veículo da frota.</p>
-          <Link to="/automoveis/novo" className="btn btn-primary">
-            Cadastrar Automóvel
-          </Link>
+          <h2>
+            {isCliente
+              ? "Nenhum automóvel disponível no momento"
+              : "Nenhum automóvel cadastrado"}
+          </h2>
+          {isAdmin && (
+            <>
+              <p>Comece cadastrando o primeiro veículo da frota.</p>
+              <Link to="/automoveis/novo" className="btn btn-primary">
+                Cadastrar Automóvel
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="cards-grid">

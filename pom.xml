@@ -71,6 +71,28 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Micronaut Security JWT -->
+        <dependency>
+            <groupId>io.micronaut.security</groupId>
+            <artifactId>micronaut-security-jwt</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Micronaut Reactor (Publisher / Mono) -->
+        <dependency>
+            <groupId>io.micronaut.reactor</groupId>
+            <artifactId>micronaut-reactor</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- BCrypt para hash de senha -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- H2 Database (desenvolvimento e testes) -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -164,6 +186,10 @@
                         <path>
                             <groupId>io.micronaut.openapi</groupId>
                             <artifactId>micronaut-openapi</artifactId>
+                        </path>
+                        <path>
+                            <groupId>io.micronaut.security</groupId>
+                            <artifactId>micronaut-security-annotations</artifactId>
                         </path>
                     </annotationProcessorPaths>
                     <compilerArgs>

@@ -13,6 +13,8 @@ import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Put;
 import io.micronaut.http.annotation.Status;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.validation.Validated;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,6 +27,7 @@ import java.util.List;
 
 @Controller("/api/v1/clientes")
 @Validated
+@Secured(SecurityRule.IS_AUTHENTICATED)
 @Tag(name = "Clientes", description = "Operações de CRUD para a entidade Cliente")
 public class ClienteController {
 
@@ -46,6 +49,7 @@ public class ClienteController {
     }
 
     @Get
+    @Secured({"AGENTE", "ADMIN"})
     @Operation(summary = "Listar clientes", description = "Retorna todos os clientes cadastrados")
     @ApiResponse(responseCode = "200", description = "Lista de clientes")
     public List<ClienteResponseDTO> listarTodos() {
@@ -79,6 +83,7 @@ public class ClienteController {
 
     @Delete("/{id}")
     @Status(HttpStatus.NO_CONTENT)
+    @Secured({"ADMIN"})
     @Operation(summary = "Remover cliente", description = "Remove um cliente pelo ID")
     @ApiResponse(responseCode = "204", description = "Cliente removido")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado",

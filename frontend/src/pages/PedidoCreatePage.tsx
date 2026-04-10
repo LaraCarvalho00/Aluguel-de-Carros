@@ -10,9 +10,14 @@ import type { ClienteResponse } from "../types/cliente";
 import type { AutomovelResponse } from "../types/automovel";
 import type { PedidoRequest } from "../types/pedido";
 import { extractErrorMessage } from "../utils/error";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function PedidoCreatePage() {
   const navigate = useNavigate();
+  const { hasRole, user } = useAuth();
+  const isAdmin = hasRole("ADMIN");
+  const isCliente = hasRole("CLIENTE");
+
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [automoveis, setAutomoveis] = useState<AutomovelResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,12 +33,27 @@ export default function PedidoCreatePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [clientesRes, automoveisRes] = await Promise.all([
-          clienteService.listarTodos(),
-          automovelService.listarDisponiveis(),
-        ]);
-        setClientes(clientesRes.data);
-        setAutomoveis(automoveisRes.data);
+        const automoveisPromise = automovelService.listarDisponiveis();
+
+        if (isAdmin) {
+          const [clientesRes, automoveisRes] = await Promise.all([
+            clienteService.listarTodos(),
+            automoveisPromise,
+          ]);
+          setClientes(clientesRes.data);
+          setAutomoveis(automoveisRes.data);
+        } else if (isCliente && user?.cpf) {
+          // CLIENTE: busca só o próprio perfil para exibição e preenche clienteId
+          const [clienteRes, automoveisRes] = await Promise.all([
+            clienteService.buscarPorCpf(user.cpf),
+            automoveisPromise,
+          ]);
+          setForm((prev) => ({ ...prev, clienteId: clienteRes.data.id }));
+          setAutomoveis(automoveisRes.data);
+        } else {
+          const automoveisRes = await automoveisPromise;
+          setAutomoveis(automoveisRes.data);
+        }
       } catch {
         toast.error("Erro ao carregar dados.");
       } finally {
@@ -41,7 +61,7 @@ export default function PedidoCreatePage() {
       }
     };
     fetchData();
-  }, []);
+  }, [isAdmin, isCliente, user?.cpf]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -56,8 +76,12 @@ export default function PedidoCreatePage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.clienteId || !form.automovelId) {
-      toast.error("Selecione o cliente e o automóvel.");
+    if (!form.automovelId) {
+      toast.error("Selecione um automóvel.");
+      return;
+    }
+    if (isAdmin && !form.clienteId) {
+      toast.error("Selecione o cliente.");
       return;
     }
     try {
@@ -80,29 +104,32 @@ export default function PedidoCreatePage() {
       <h1>Novo Pedido de Aluguel</h1>
       <form className="form" onSubmit={handleSubmit}>
         <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="clienteId">Cliente *</label>
-            <select
-              id="clienteId"
-              name="clienteId"
-              required
-              value={form.clienteId}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value={0} disabled>
-                Selecione um cliente
-              </option>
-              {clientes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nome} - CPF: {c.cpf}
+
+          {isAdmin && (
+            <div className="form-group">
+              <label htmlFor="clienteId">Cliente *</label>
+              <select
+                id="clienteId"
+                name="clienteId"
+                required
+                value={form.clienteId}
+                onChange={handleChange}
+                className="form-select"
+              >
+                <option value={0} disabled>
+                  Selecione um cliente
                 </option>
-              ))}
-            </select>
-          </div>
+                {clientes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome} — CPF: {c.cpf}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-group">
-            <label htmlFor="automovelId">Automóvel *</label>
+            <label htmlFor="automovelId">Automóvel disponível *</label>
             <select
               id="automovelId"
               name="automovelId"
@@ -116,7 +143,7 @@ export default function PedidoCreatePage() {
               </option>
               {automoveis.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.marca} {a.modelo} {a.ano} - {a.placa}
+                  {a.marca} {a.modelo} {a.ano} — {a.placa}
                 </option>
               ))}
             </select>

@@ -3,6 +3,8 @@ micronaut:
     name: aluguel-de-carros-test
   server:
     port: -1
+  security:
+    enabled: false
 
 datasources:
   default:

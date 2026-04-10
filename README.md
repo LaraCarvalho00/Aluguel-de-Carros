@@ -4,6 +4,7 @@
 [![Micronaut](https://img.shields.io/badge/Micronaut-4.10-1A1A1A?style=for-the-badge&logo=micronaut&logoColor=white)](https://micronaut.io/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 Sistema web para gestao completa do ciclo de vida de alugueis de automoveis, desenvolvido para o curso de Engenharia de Software da PUC Minas.
@@ -16,6 +17,7 @@ Sistema web para gestao completa do ciclo de vida de alugueis de automoveis, des
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Arquitetura](#arquitetura)
+- [Seguranca e Papeis](#seguranca-e-papeis)
 - [Principios SOLID](#principios-solid)
 - [Padroes de Projeto](#padroes-de-projeto)
 - [Stack Tecnologica](#stack-tecnologica)
@@ -35,9 +37,9 @@ O sistema atende tres perfis principais de usuarios:
 
 | Perfil | Responsabilidades |
 |--------|-------------------|
-| **Cliente** | Criar, modificar, consultar e cancelar pedidos de aluguel |
-| **Agente (Empresa/Banco)** | Avaliar pedidos financeiramente, emitir pareceres e conceder contratos de credito |
-| **Administrador** | Gerenciar usuarios, frota de veiculos e configuracoes do sistema |
+| **Cliente** | Criar, modificar, consultar e cancelar apenas os seus proprios pedidos de aluguel |
+| **Agente (Empresa/Banco)** | Avaliar pedidos financeiramente, emitir pareceres e formalizar contratos de credito |
+| **Administrador** | Gerenciar clientes, frota de veiculos, pedidos, contratos e todos os dados do sistema |
 
 Sobre os contratantes, armazenam-se dados de identificacao (RG, CPF, Nome, Endereco), profissao, entidades empregadoras (maximo 3) e rendimentos. Sobre os automoveis, registram-se matricula, ano, marca, modelo e placa. Dependendo do tipo de contrato, os automoveis podem ser registrados como propriedade de clientes, empresas ou bancos.
 
@@ -49,6 +51,10 @@ O projeto segue **Clean Architecture** com separacao em camadas e inversao de de
 
 ```
                     ┌──────────────────────────┐
+                    │    Micronaut Security     │  JWT / Bearer Token
+                    └────────────┬─────────────┘
+                                 │
+                    ┌────────────▼─────────────┐
                     │       Controllers        │  HTTP / REST
                     └────────────┬─────────────┘
                                  │
@@ -74,7 +80,7 @@ O projeto segue **Clean Architecture** com separacao em camadas e inversao de de
                     └────────────┬─────────────┘
                                  │
                     ┌────────────▼─────────────┐
-                    │      H2 / PostgreSQL      │
+                    │        PostgreSQL         │
                     └──────────────────────────┘
 ```
 
@@ -85,13 +91,48 @@ O projeto segue **Clean Architecture** com separacao em camadas e inversao de de
 | **Apresentacao** | `application.controller` | Endpoints REST, validacao de entrada, documentacao Swagger |
 | **Aplicacao** | `application.service`, `application.facade` | Regras de aplicacao, orquestracao de fluxos via Facade |
 | **Dominio** | `domain.entity`, `domain.enums`, `domain.exception` | Entidades JPA, enums de negocio, excecoes de dominio |
-| **Infraestrutura** | `infrastructure.repository` | Persistencia de dados com Micronaut Data |
+| **Infraestrutura** | `infrastructure.repository`, `infrastructure.security` | Persistencia de dados e autenticacao JWT |
 | **Transporte** | `application.dto`, `application.mapper` | DTOs imutaveis (request/response) e conversao entre camadas |
 | **Tratamento de Erros** | `application.handler` | Exception handler global com respostas padronizadas |
 
-### Diagrama de Pacotes
+---
 
-![Diagrama de Pacotes](docs/diagrama_pacotes.png)
+## Seguranca e Papeis
+
+O sistema utiliza **JWT (JSON Web Token)** via Micronaut Security. Todos os endpoints (exceto `/api/v1/auth/registro` e `/api/v1/auth/login`) exigem autenticacao.
+
+### Matriz de Permissoes por Endpoint
+
+| Endpoint | CLIENTE | AGENTE | ADMIN |
+|----------|:-------:|:------:|:-----:|
+| `POST /clientes` | sim | sim | sim |
+| `GET /clientes` (todos) | nao | sim | sim |
+| `GET /clientes/{id}` | sim | sim | sim |
+| `GET /clientes/cpf/{cpf}` | sim | sim | sim |
+| `PUT /clientes/{id}` | sim | sim | sim |
+| `DELETE /clientes/{id}` | nao | nao | sim |
+| `GET /automoveis` (todos) | nao | sim | sim |
+| `GET /automoveis/disponiveis` | sim | sim | sim |
+| `POST /automoveis` | nao | nao | sim |
+| `PUT/DELETE /automoveis/{id}` | nao | nao | sim |
+| `POST /pedidos` | sim (proprio) | nao | sim |
+| `GET /pedidos` (todos) | nao | sim | sim |
+| `GET /pedidos/cliente/{id}` | sim | sim | sim |
+| `PUT /pedidos/{id}` | sim (proprio) | nao | sim |
+| `PATCH /pedidos/{id}/cancelar` | sim (proprio) | nao | sim |
+| `PATCH /pedidos/{id}/avaliar` | nao | sim | sim |
+| `POST /contratos` | nao | sim | sim |
+| `GET /contratos` | nao | sim | sim |
+
+> **Regra de propriedade:** CLIENTE so pode modificar ou cancelar pedidos criados com o seu proprio CPF. O sistema valida isso no servidor comparando o CPF do JWT com o `clienteId` do pedido.
+
+### Papeis Disponiveis
+
+| Enum `Perfil` | Descricao |
+|---------------|-----------|
+| `CLIENTE` | Usuario final que solicita alugueis |
+| `AGENTE` | Empresa ou banco que avalia pedidos e executa contratos |
+| `ADMIN` | Administrador com acesso irrestrito ao sistema |
 
 ---
 
@@ -133,6 +174,7 @@ Controllers e Facade dependem apenas de interfaces, nunca de implementacoes conc
 public class PedidoController {
     private final AluguelFacade aluguelFacade;     // Depende da abstracao
     private final IPedidoService pedidoService;     // Interface, nao impl
+    private final IClienteService clienteService;   // Interface, nao impl
 }
 ```
 
@@ -147,6 +189,7 @@ public class PedidoController {
 | **DTO** | Transferencia | Records imutaveis (`@Serdeable`) para request/response, desacoplados das entidades |
 | **Mapper** | Transformacao | Classes dedicadas para conversao bidirecional entre DTOs e entidades |
 | **State** | Comportamental | `StatusPedido` controla as transicoes validas do ciclo de vida do pedido |
+| **Provider** | Comportamental | `AuthenticationProviderImpl` encapsula a logica de autenticacao JWT |
 
 ---
 
@@ -158,9 +201,10 @@ public class PedidoController {
 |------------|--------|-----------|
 | Java | 17+ | Linguagem principal |
 | Micronaut | 4.10 | Framework HTTP (Netty) |
+| Micronaut Security JWT | 4.x | Autenticacao e autorizacao com JWT |
 | Micronaut Data JPA | 4.x | Persistencia com Hibernate 6 |
-| H2 | - | Banco em memoria (desenvolvimento) |
-| PostgreSQL | 15+ | Banco relacional (producao) |
+| PostgreSQL | 15+ | Banco relacional (local via Docker ou nuvem via Render) |
+| BCrypt (jbcrypt) | 0.4 | Hash seguro de senhas |
 | OpenAPI / Swagger UI | 3.x | Documentacao interativa da API |
 | JUnit 5 + Mockito | - | Testes unitarios e de integracao |
 | Maven | 3.9+ | Build e gerenciamento de dependencias |
@@ -172,8 +216,8 @@ public class PedidoController {
 | React | 19 | Biblioteca de UI |
 | TypeScript | 5.9 | Tipagem estatica |
 | Vite | 8.x | Build tool e dev server |
-| Axios | 1.14 | Cliente HTTP |
-| React Router | 7.x | Roteamento SPA |
+| Axios | 1.14 | Cliente HTTP com interceptor JWT |
+| React Router | 7.x | Roteamento SPA com rotas protegidas |
 | React Hot Toast | 2.6 | Notificacoes |
 | React Icons | 5.6 | Icones |
 
@@ -189,6 +233,7 @@ public class PedidoController {
 | **Automovel** | id, matricula, ano, marca, modelo, placa, disponivel, proprietario (CLIENTE/EMPRESA/BANCO) |
 | **Pedido** | id, cliente, automovel, status, dataInicio, dataFim, parecer, dataCriacao, dataAtualizacao |
 | **Contrato** | id, pedido, valorTotal, taxaJuros, parcelas, bancoAgente, dataCriacao |
+| **Usuario** | id, cpf, senha (BCrypt), perfil (CLIENTE/AGENTE/ADMIN) |
 
 ### Enumeradores
 
@@ -196,6 +241,7 @@ public class PedidoController {
 |------|---------|
 | `StatusPedido` | PENDENTE, EM_ANALISE, APROVADO, REPROVADO, CONTRATADO, CANCELADO |
 | `TipoPropriedade` | CLIENTE, EMPRESA, BANCO |
+| `Perfil` | CLIENTE, AGENTE, ADMIN |
 
 ### Ciclo de Vida do Pedido
 
@@ -209,7 +255,7 @@ public class PedidoController {
        │                                ┌───────────┐
        │                                │ REPROVADO │
        │                                └───────────┘
-       │ cancelamento
+       │ cancelamento (somente pelo dono do pedido)
        ▼
   ┌───────────┐
   │ CANCELADO │
@@ -222,48 +268,55 @@ public class PedidoController {
 
 Documentacao interativa disponivel em `http://localhost:8080/swagger-ui/index.html`
 
+### Autenticacao `/api/v1/auth`
+
+| Metodo | Rota | Descricao | Acesso |
+|--------|------|-----------|--------|
+| `POST` | `/registro` | Criar conta de usuario | Publico |
+| `POST` | `/login` | Autenticar e obter JWT | Publico |
+
 ### Clientes `/api/v1/clientes`
 
-| Metodo | Rota | Descricao |
-|--------|------|-----------|
-| `POST` | `/` | Cadastrar cliente |
-| `GET` | `/` | Listar todos |
-| `GET` | `/{id}` | Buscar por ID |
-| `GET` | `/cpf/{cpf}` | Buscar por CPF |
-| `PUT` | `/{id}` | Atualizar |
-| `DELETE` | `/{id}` | Remover |
+| Metodo | Rota | Descricao | Acesso |
+|--------|------|-----------|--------|
+| `POST` | `/` | Cadastrar cliente | Autenticado |
+| `GET` | `/` | Listar todos | AGENTE, ADMIN |
+| `GET` | `/{id}` | Buscar por ID | Autenticado |
+| `GET` | `/cpf/{cpf}` | Buscar por CPF | Autenticado |
+| `PUT` | `/{id}` | Atualizar | Autenticado |
+| `DELETE` | `/{id}` | Remover | ADMIN |
 
 ### Automoveis `/api/v1/automoveis`
 
-| Metodo | Rota | Descricao |
-|--------|------|-----------|
-| `POST` | `/` | Cadastrar automovel |
-| `GET` | `/` | Listar todos |
-| `GET` | `/disponiveis` | Listar disponiveis para aluguel |
-| `GET` | `/{id}` | Buscar por ID |
-| `PUT` | `/{id}` | Atualizar |
-| `DELETE` | `/{id}` | Remover |
+| Metodo | Rota | Descricao | Acesso |
+|--------|------|-----------|--------|
+| `POST` | `/` | Cadastrar automovel | ADMIN |
+| `GET` | `/` | Listar todos | AGENTE, ADMIN |
+| `GET` | `/disponiveis` | Listar disponiveis para aluguel | Autenticado |
+| `GET` | `/{id}` | Buscar por ID | Autenticado |
+| `PUT` | `/{id}` | Atualizar | ADMIN |
+| `DELETE` | `/{id}` | Remover | ADMIN |
 
 ### Pedidos `/api/v1/pedidos`
 
-| Metodo | Rota | Descricao |
-|--------|------|-----------|
-| `POST` | `/` | Criar pedido de aluguel |
-| `GET` | `/` | Listar todos |
-| `GET` | `/{id}` | Buscar por ID |
-| `GET` | `/cliente/{clienteId}` | Listar pedidos de um cliente |
-| `PUT` | `/{id}` | Modificar pedido pendente |
-| `PATCH` | `/{id}/avaliar` | Emitir parecer financeiro (aprovar/reprovar) |
-| `PATCH` | `/{id}/cancelar` | Cancelar pedido |
+| Metodo | Rota | Descricao | Acesso |
+|--------|------|-----------|--------|
+| `POST` | `/` | Criar pedido de aluguel | CLIENTE (auto-CPF), ADMIN |
+| `GET` | `/` | Listar todos | AGENTE, ADMIN |
+| `GET` | `/{id}` | Buscar por ID | Autenticado |
+| `GET` | `/cliente/{clienteId}` | Listar pedidos de um cliente | Autenticado |
+| `PUT` | `/{id}` | Modificar pedido pendente | CLIENTE (proprio), ADMIN |
+| `PATCH` | `/{id}/avaliar` | Emitir parecer financeiro | AGENTE, ADMIN |
+| `PATCH` | `/{id}/cancelar` | Cancelar pedido | CLIENTE (proprio), ADMIN |
 
 ### Contratos `/api/v1/contratos`
 
-| Metodo | Rota | Descricao |
-|--------|------|-----------|
-| `POST` | `/` | Executar contrato de credito |
-| `GET` | `/` | Listar todos |
-| `GET` | `/{id}` | Buscar por ID |
-| `GET` | `/pedido/{pedidoId}` | Buscar contrato por pedido |
+| Metodo | Rota | Descricao | Acesso |
+|--------|------|-----------|--------|
+| `POST` | `/` | Executar contrato de credito | AGENTE, ADMIN |
+| `GET` | `/` | Listar todos | AGENTE, ADMIN |
+| `GET` | `/{id}` | Buscar por ID | Autenticado |
+| `GET` | `/pedido/{pedidoId}` | Buscar contrato por pedido | Autenticado |
 
 ---
 
@@ -276,6 +329,7 @@ src/main/java/com/pucminas/aluguelcarros/
 ├── Application.java
 ├── application/
 │   ├── controller/
+│   │   ├── AuthController.java
 │   │   ├── ClienteController.java
 │   │   ├── AutomovelController.java
 │   │   ├── PedidoController.java
@@ -286,12 +340,14 @@ src/main/java/com/pucminas/aluguelcarros/
 │   │   │   ├── AutomovelRequestDTO.java
 │   │   │   ├── PedidoRequestDTO.java
 │   │   │   ├── ParecerRequestDTO.java
-│   │   │   └── ContratoRequestDTO.java
+│   │   │   ├── ContratoRequestDTO.java
+│   │   │   └── RegistroRequestDTO.java
 │   │   └── response/
 │   │       ├── ClienteResponseDTO.java
 │   │       ├── AutomovelResponseDTO.java
 │   │       ├── PedidoResponseDTO.java
-│   │       └── ContratoResponseDTO.java
+│   │       ├── ContratoResponseDTO.java
+│   │       └── UsuarioResponseDTO.java
 │   ├── facade/
 │   │   └── AluguelFacade.java
 │   ├── handler/
@@ -317,27 +373,36 @@ src/main/java/com/pucminas/aluguelcarros/
 │   │   ├── Cliente.java
 │   │   ├── Automovel.java
 │   │   ├── Pedido.java
-│   │   └── Contrato.java
+│   │   ├── Contrato.java
+│   │   └── Usuario.java
 │   ├── enums/
 │   │   ├── StatusPedido.java
-│   │   └── TipoPropriedade.java
+│   │   ├── TipoPropriedade.java
+│   │   └── Perfil.java
 │   └── exception/
 │       ├── BusinessException.java
 │       └── ResourceNotFoundException.java
 └── infrastructure/
-    └── repository/
-        ├── ClienteRepository.java
-        ├── AutomovelRepository.java
-        ├── PedidoRepository.java
-        └── ContratoRepository.java
+    ├── repository/
+    │   ├── ClienteRepository.java
+    │   ├── AutomovelRepository.java
+    │   ├── PedidoRepository.java
+    │   ├── ContratoRepository.java
+    │   └── UsuarioRepository.java
+    └── security/
+        ├── AuthenticationProviderImpl.java
+        └── PasswordEncoderService.java
 ```
 
 ### Frontend
 
 ```
 frontend/src/
+├── contexts/
+│   └── AuthContext.tsx          (estado global de autenticacao + JWT)
 ├── components/
-│   ├── Header.tsx
+│   ├── Header.tsx               (navegacao com menu por perfil)
+│   ├── PrivateRoute.tsx         (protecao de rotas por papel)
 │   ├── ClienteCard.tsx
 │   ├── ClienteForm.tsx
 │   ├── AutomovelCard.tsx
@@ -346,7 +411,8 @@ frontend/src/
 │   ├── ParecerModal.tsx
 │   └── ConfirmModal.tsx
 ├── pages/
-│   ├── Home.tsx
+│   ├── Home.tsx                 (dashboard por perfil)
+│   ├── LoginPage.tsx
 │   ├── ClienteListPage.tsx
 │   ├── ClienteCreatePage.tsx
 │   ├── ClienteEditPage.tsx
@@ -355,9 +421,11 @@ frontend/src/
 │   ├── AutomovelCreatePage.tsx
 │   ├── AutomovelEditPage.tsx
 │   ├── PedidoListPage.tsx
-│   └── PedidoCreatePage.tsx
+│   ├── PedidoCreatePage.tsx
+│   ├── ContratoListPage.tsx
+│   └── ContratoCreatePage.tsx
 ├── services/
-│   └── api.ts
+│   └── api.ts                   (axios + interceptor JWT)
 ├── types/
 │   ├── cliente.ts
 │   ├── automovel.ts
@@ -381,11 +449,57 @@ frontend/src/
 
 ### Backend
 
-```bash
-./mvnw mn:run
+**Opcao 1 — Banco na nuvem (Render):**
+
+```powershell
+$env:JAVA_HOME   = "C:\Program Files\Java\jdk-17"
+$env:URL_BD      = "jdbc:postgresql://dpg-d7c3t1dckfvc73833p90-a.oregon-postgres.render.com:5432/aluguelveiculo"
+$env:USER_BD     = "aluguelveiculo_user"
+$env:PASSWORD_BD = "98RRwDC6wkHCawSEEgB6aqKJn0toZ0It"
+.\mvnw.cmd mn:run
 ```
 
-Inicia na porta `8080` com banco H2 em memoria. Swagger UI disponivel em `/swagger-ui/index.html`.
+**Opcao 2 — Banco local (Docker):**
+
+```bash
+cd docker-compose-postgre && docker compose up -d
+```
+
+```powershell
+$env:URL_BD      = "jdbc:postgresql://localhost:5433/aluguelcarros"
+$env:USER_BD     = "postgres"
+$env:PASSWORD_BD = "1234567"
+.\mvnw.cmd mn:run
+```
+
+Inicia na porta `8080`. Swagger UI disponivel em `http://localhost:8080/swagger-ui/index.html`.
+
+### Criar usuarios iniciais
+
+Apos subir o backend, registre os usuarios via `POST /api/v1/auth/registro`:
+
+```json
+{ "cpf": "33333333333", "senha": "123456", "perfil": "ADMIN"  }
+{ "cpf": "22222222222", "senha": "123456", "perfil": "AGENTE" }
+{ "cpf": "11111111111", "senha": "123456", "perfil": "CLIENTE" }
+```
+
+### Usuarios de teste pre-cadastrados (banco Render)
+
+| Perfil | CPF | Senha |
+|--------|-----|-------|
+| ADMIN  | `33333333333` | `123456` |
+| AGENTE | `22222222222` | `123456` |
+| CLIENTE | `44444444444` | `senha123` |
+| CLIENTE | `55555555555` | `senha123` |
+| CLIENTE | `66666666666` | `senha123` |
+| CLIENTE | `77777777777` | `senha123` |
+| CLIENTE | `88888888888` | `senha123` |
+| CLIENTE | `99999999999` | `senha123` |
+| CLIENTE | `10101010101` | `senha123` |
+| CLIENTE | `12121212121` | `senha123` |
+| CLIENTE | `13131313131` | `senha123` |
+| CLIENTE | `14141414141` | `senha123` |
 
 ### Frontend
 
@@ -395,26 +509,27 @@ npm install
 npm run dev
 ```
 
-Inicia na porta `3000` com proxy configurado para o backend.
+Inicia na porta `5173` com proxy configurado para o backend em `8080`.
 
 ### Testes
 
 ```bash
-./mvnw test
+.\mvnw.cmd test
 ```
 
 ---
 
 ## Diagramas UML
 
-Disponiveis no diretorio `/docs`:
+Disponiveis no diretorio [`/docs`](docs/).
 
-| Diagrama | Descricao |
-|----------|-----------|
-| Casos de Uso | Interacoes entre atores e funcionalidades |
-| Classes | Estrutura de dados e relacionamentos do dominio |
-| Pacotes (Visao Logica) | Organizacao em camadas da arquitetura |
-| Componentes | Modulos do sistema e suas dependencias |
+| Diagrama | Sprint | Arquivo |
+|----------|--------|---------|
+| Casos de Uso | S01 | [diagrama_casos_uso.png](docs/diagrama_casos_uso.png) |
+| Classes | S01 | [diagrama_classes.png](docs/diagrama_classes.png) |
+| Pacotes (Visao Logica) | S01 | [diagrama_pacotes.png](docs/diagrama_pacotes.png) |
+| Componentes | S02 | [diagrama_componentes.png](docs/diagrama_componentes.png) |
+| Implantacao | S03 | [diagrama-implantacao.png](docs/diagrama-implantacao.png) |
 
 ---
 
@@ -424,11 +539,11 @@ Documentadas em [`HISTORIAS_USUARIO.md`](HISTORIAS_USUARIO.md), cobrindo:
 
 | Grupo | Historias | Descricao |
 |-------|-----------|-----------|
-| Cadastro e Autenticacao | US01 - US03 | Registro de clientes e acesso ao sistema |
-| Fluxo de Aluguel | US04 - US06 | Solicitacao, gestao e acompanhamento de pedidos |
-| Gestao e Aprovacao | US07 - US09 | Avaliacao financeira e execucao de contratos |
-| Financiamento | US10 - US11 | Concessao e associacao de contratos de credito |
-| Gestao de Frota | US12 | Manutencao dos dados de automoveis |
+| Cadastro e Autenticacao | US01 - US03 | Registro de clientes e acesso ao sistema por perfil |
+| Fluxo de Aluguel | US04 - US06 | Solicitacao, gestao e acompanhamento de pedidos pelo cliente |
+| Gestao e Aprovacao | US07 - US09 | Avaliacao financeira e execucao de contratos pelo agente |
+| Financiamento | US10 - US11 | Concessao e associacao de contratos de credito bancario |
+| Gestao de Frota | US12 | Manutencao dos dados de automoveis pelo administrador |
 
 ---
 
@@ -437,8 +552,8 @@ Documentadas em [`HISTORIAS_USUARIO.md`](HISTORIAS_USUARIO.md), cobrindo:
 | Sprint | Entregaveis |
 |--------|-------------|
 | **Lab02S01** | Diagrama de Casos de Uso, Historias de Usuario, Diagrama de Classes, Diagrama de Pacotes |
-| **Lab02S02** | Revisao dos diagramas + Diagrama de Componentes + CRUD de Cliente (web, Java, MVC) |
-| **Lab02S03** | Revisao dos diagramas + Diagrama de Implantacao + Prototipo completo com pedidos de aluguel |
+| **Lab02S02** | Revisao dos diagramas + Diagrama de Componentes + CRUD completo de Cliente, Automovel, Pedido e Contrato (web, Java, MVC) |
+| **Lab02S03** | Revisao dos diagramas + Diagrama de Implantacao + Autenticacao JWT + Controle de acesso por papel (CLIENTE/AGENTE/ADMIN) + Prototipo completo com ciclo de vida do pedido de aluguel |
 
 ---
 

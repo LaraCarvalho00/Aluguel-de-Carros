@@ -1,44 +1,156 @@
 import { Link } from "react-router-dom";
-import { FiUsers, FiUserPlus, FiSearch, FiTruck, FiFileText, FiPlusCircle } from "react-icons/fi";
+import {
+  FiTruck,
+  FiFileText,
+  FiPlusCircle,
+  FiUsers,
+  FiUserPlus,
+  FiSearch,
+  FiClipboard,
+  FiCheckSquare,
+} from "react-icons/fi";
+import { useAuth } from "../contexts/AuthContext";
+
+interface Card {
+  to: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
 
 export default function Home() {
+  const { hasRole, user } = useAuth();
+  const isCliente = hasRole("CLIENTE");
+  const isAgente  = hasRole("AGENTE");
+  const isAdmin   = hasRole("ADMIN");
+
+  const clienteCards: Card[] = [
+    {
+      to: "/automoveis",
+      icon: <FiTruck size={36} />,
+      title: "Automóveis Disponíveis",
+      description: "Veja os veículos disponíveis para alugar.",
+    },
+    {
+      to: "/pedidos/novo",
+      icon: <FiPlusCircle size={36} />,
+      title: "Solicitar Aluguel",
+      description: "Crie um novo pedido de aluguel.",
+    },
+    {
+      to: "/pedidos",
+      icon: <FiFileText size={36} />,
+      title: "Meus Pedidos",
+      description: "Acompanhe o status dos seus pedidos.",
+    },
+  ];
+
+  const agenteCards: Card[] = [
+    {
+      to: "/clientes",
+      icon: <FiUsers size={36} />,
+      title: "Clientes",
+      description: "Visualize e gerencie os clientes cadastrados.",
+    },
+    {
+      to: "/pedidos",
+      icon: <FiCheckSquare size={36} />,
+      title: "Avaliar Pedidos",
+      description: "Analise e emita parecer sobre os pedidos.",
+    },
+    {
+      to: "/contratos/novo",
+      icon: <FiClipboard size={36} />,
+      title: "Executar Contrato",
+      description: "Formalize contratos de pedidos aprovados.",
+    },
+    {
+      to: "/contratos",
+      icon: <FiFileText size={36} />,
+      title: "Contratos",
+      description: "Visualize todos os contratos firmados.",
+    },
+  ];
+
+  const adminCards: Card[] = [
+    {
+      to: "/clientes",
+      icon: <FiUsers size={36} />,
+      title: "Clientes",
+      description: "Gerencie todos os clientes do sistema.",
+    },
+    {
+      to: "/clientes/novo",
+      icon: <FiUserPlus size={36} />,
+      title: "Cadastrar Cliente",
+      description: "Registre um novo cliente.",
+    },
+    {
+      to: "/clientes/buscar",
+      icon: <FiSearch size={36} />,
+      title: "Buscar por CPF",
+      description: "Encontre um cliente pelo CPF.",
+    },
+    {
+      to: "/automoveis",
+      icon: <FiTruck size={36} />,
+      title: "Frota de Automóveis",
+      description: "Gerencie todos os veículos cadastrados.",
+    },
+    {
+      to: "/automoveis/novo",
+      icon: <FiPlusCircle size={36} />,
+      title: "Novo Automóvel",
+      description: "Cadastre um novo veículo na frota.",
+    },
+    {
+      to: "/pedidos",
+      icon: <FiFileText size={36} />,
+      title: "Todos os Pedidos",
+      description: "Visualize e gerencie todos os pedidos.",
+    },
+    {
+      to: "/contratos",
+      icon: <FiClipboard size={36} />,
+      title: "Contratos",
+      description: "Visualize todos os contratos formalizados.",
+    },
+  ];
+
+  const cards = isAdmin ? adminCards : isAgente ? agenteCards : clienteCards;
+
+  const perfilLabel: Record<string, string> = {
+    CLIENTE: "Cliente",
+    AGENTE:  "Agente",
+    ADMIN:   "Administrador",
+  };
+
+  const perfilDesc: Record<string, string> = {
+    CLIENTE: "Solicite e acompanhe seus pedidos de aluguel.",
+    AGENTE:  "Analise pedidos, emita pareceres e formalize contratos.",
+    ADMIN:   "Gerencie clientes, veículos, pedidos e contratos.",
+  };
+
+  const perfil = user?.perfil ?? "";
+
   return (
     <div className="home">
       <div className="hero">
-        <h1>Sistema de Aluguel de Carros</h1>
-        <p>Gerencie clientes, veículos e pedidos de aluguel de forma rápida e eficiente.</p>
+        <h1>Bem-vindo, {user?.cpf}</h1>
+        <p>
+          <strong>{perfilLabel[perfil] ?? perfil}</strong>&nbsp;—&nbsp;
+          {perfilDesc[perfil] ?? ""}
+        </p>
       </div>
+
       <div className="home-cards">
-        <Link to="/clientes" className="home-card">
-          <FiUsers size={40} />
-          <h2>Ver Clientes</h2>
-          <p>Visualize todos os clientes cadastrados no sistema.</p>
-        </Link>
-        <Link to="/clientes/novo" className="home-card">
-          <FiUserPlus size={40} />
-          <h2>Cadastrar Cliente</h2>
-          <p>Registre um novo cliente com seus dados pessoais.</p>
-        </Link>
-        <Link to="/clientes/buscar" className="home-card">
-          <FiSearch size={40} />
-          <h2>Buscar por CPF</h2>
-          <p>Encontre rapidamente um cliente pelo número do CPF.</p>
-        </Link>
-        <Link to="/automoveis" className="home-card">
-          <FiTruck size={40} />
-          <h2>Frota de Automóveis</h2>
-          <p>Gerencie os veículos disponíveis para aluguel.</p>
-        </Link>
-        <Link to="/automoveis/novo" className="home-card">
-          <FiPlusCircle size={40} />
-          <h2>Novo Automóvel</h2>
-          <p>Cadastre um novo veículo na frota do sistema.</p>
-        </Link>
-        <Link to="/pedidos" className="home-card">
-          <FiFileText size={40} />
-          <h2>Pedidos de Aluguel</h2>
-          <p>Acompanhe e gerencie todos os pedidos de aluguel.</p>
-        </Link>
+        {cards.map(({ to, icon, title, description }) => (
+          <Link key={to} to={to} className="home-card">
+            {icon}
+            <h2>{title}</h2>
+            <p>{description}</p>
+          </Link>
+        ))}
       </div>
     </div>
   );

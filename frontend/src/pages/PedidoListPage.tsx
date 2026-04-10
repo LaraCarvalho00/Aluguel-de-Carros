@@ -2,34 +2,46 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiPlus, FiInbox } from "react-icons/fi";
 import toast from "react-hot-toast";
-import { pedidoService } from "../services/api";
+import { pedidoService, clienteService } from "../services/api";
 import type { PedidoResponse } from "../types/pedido";
 import PedidoCard from "../components/PedidoCard";
 import ConfirmModal from "../components/ConfirmModal";
 import ParecerModal from "../components/ParecerModal";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function PedidoListPage() {
+  const { hasRole, user } = useAuth();
+  const isCliente      = hasRole("CLIENTE");
+  const podeNovoPedido = isCliente || hasRole("ADMIN");
+  const podeCancelar   = isCliente || hasRole("ADMIN");
+  const podeAvaliar    = hasRole("AGENTE") || hasRole("ADMIN");
   const [pedidos, setPedidos] = useState<PedidoResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<number | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [avaliarId, setAvaliarId] = useState<number | null>(null);
 
-  const fetchPedidos = async () => {
-    try {
-      setLoading(true);
-      const { data } = await pedidoService.listarTodos();
-      setPedidos(data);
-    } catch {
-      toast.error("Erro ao carregar pedidos.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPedidos = async () => {
+      try {
+        setLoading(true);
+        if (isCliente && user?.cpf) {
+          // CLIENTE só vê os próprios pedidos
+          const { data: cliente } = await clienteService.buscarPorCpf(user.cpf);
+          const { data } = await pedidoService.listarPorCliente(cliente.id);
+          setPedidos(data);
+        } else {
+          const { data } = await pedidoService.listarTodos();
+          setPedidos(data);
+        }
+      } catch {
+        toast.error("Erro ao carregar pedidos.");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchPedidos();
-  }, []);
+  }, [isCliente, user?.cpf]);
 
   const handleCancelar = async () => {
     if (cancelId === null) return;
@@ -79,19 +91,25 @@ export default function PedidoListPage() {
     <div className="page">
       <div className="page-header">
         <h1>Pedidos de Aluguel</h1>
-        <Link to="/pedidos/novo" className="btn btn-primary">
-          <FiPlus size={16} /> Novo Pedido
-        </Link>
+        {podeNovoPedido && (
+          <Link to="/pedidos/novo" className="btn btn-primary">
+            <FiPlus size={16} /> Novo Pedido
+          </Link>
+        )}
       </div>
 
       {pedidos.length === 0 ? (
         <div className="empty-state">
           <FiInbox size={48} />
           <h2>Nenhum pedido registrado</h2>
-          <p>Crie o primeiro pedido de aluguel.</p>
-          <Link to="/pedidos/novo" className="btn btn-primary">
-            Criar Pedido
-          </Link>
+          {podeNovoPedido && (
+            <>
+              <p>Crie o primeiro pedido de aluguel.</p>
+              <Link to="/pedidos/novo" className="btn btn-primary">
+                Criar Pedido
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="cards-grid">
@@ -99,8 +117,8 @@ export default function PedidoListPage() {
             <PedidoCard
               key={pedido.id}
               pedido={pedido}
-              onCancelar={setCancelId}
-              onAvaliar={setAvaliarId}
+              onCancelar={podeCancelar ? setCancelId : undefined}
+              onAvaliar={podeAvaliar ? setAvaliarId : undefined}
             />
           ))}
         </div>
