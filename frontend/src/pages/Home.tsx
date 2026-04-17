@@ -20,7 +20,6 @@ interface Card {
 
 export default function Home() {
   const { hasRole, user } = useAuth();
-  const isCliente = hasRole("CLIENTE");
   const isAgente  = hasRole("AGENTE");
   const isAdmin   = hasRole("ADMIN");
 
