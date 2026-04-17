@@ -24,7 +24,7 @@ export default function ClienteCreatePage() {
   };
 
   return (
-    <div className="page">
+    <div className="page-form-centered">
       <h1>Cadastrar Novo Cliente</h1>
       <ClienteForm onSubmit={handleSubmit} loading={loading} submitLabel="Cadastrar" />
     </div>

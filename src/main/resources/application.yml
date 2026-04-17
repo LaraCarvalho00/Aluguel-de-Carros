@@ -1,8 +1,13 @@
+seed:
+  usuarios-demo:
+    # Cria/atualiza ADMIN, AGENTE e CLIENTE de demonstração (CPFs e nomes alinhados ao README). Desative em produção se não desejar.
+    enabled: true
+
 micronaut:
   application:
     name: aluguel-de-carros
   server:
-    port: 8080
+    port: ${PORT:8080}
   security:
     enabled: true
     authentication: bearer

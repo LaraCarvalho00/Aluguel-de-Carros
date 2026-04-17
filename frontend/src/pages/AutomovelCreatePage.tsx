@@ -24,7 +24,7 @@ export default function AutomovelCreatePage() {
   };
 
   return (
-    <div className="page">
+    <div className="page-form-centered">
       <h1>Cadastrar Novo Automóvel</h1>
       <AutomovelForm
         onSubmit={handleSubmit}

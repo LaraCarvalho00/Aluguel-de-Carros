@@ -49,7 +49,7 @@ export default function ContratoCreatePage() {
   if (loading) return <div className="loading">Carregando pedidos aprovados...</div>;
 
   return (
-    <div className="page">
+    <div className="page-form-centered">
       <div className="page-header">
         <h1>Executar Contrato</h1>
       </div>

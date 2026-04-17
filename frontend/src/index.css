@@ -1,11 +1,13 @@
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #dbeafe;
+  --primary: #e94560;
+  --primary-hover: #c73652;
+  --primary-light: #fce4e9;
   --danger: #dc2626;
   --danger-hover: #b91c1c;
   --danger-light: #fee2e2;
   --success: #16a34a;
+  --bg-dark: #1a1a2e;
+  --bg-dark-2: #16213e;
   --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
@@ -22,6 +24,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   --transition: 0.2s ease;
+  --font-title: 'Racing Sans One', cursive;
 }
 
 *,
@@ -66,8 +69,9 @@ body {
   gap: 0.5rem;
   text-decoration: none;
   color: var(--gray-900);
-  font-weight: 700;
-  font-size: 1.25rem;
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
 }
 
 .logo-icon {
@@ -116,14 +120,30 @@ body {
 }
 
 .page-header h1 {
+  font-family: var(--font-title);
   font-size: 1.75rem;
-  font-weight: 700;
   color: var(--gray-900);
 }
 
-.page h1 {
+.page-form-centered {
+  max-width: 740px;
+  margin: 2rem auto;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 2.5rem 2rem;
+}
+
+.page-form-centered h1 {
+  font-family: var(--font-title);
   font-size: 1.75rem;
-  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 1.5rem;
+}
+
+.page h1 {
+  font-family: var(--font-title);
+  font-size: 1.75rem;
   color: var(--gray-900);
   margin-bottom: 1.5rem;
 }
@@ -134,8 +154,8 @@ body {
 }
 
 .hero h1 {
+  font-family: var(--font-title);
   font-size: 2.5rem;
-  font-weight: 800;
   color: var(--gray-900);
   margin-bottom: 0.75rem;
 }
@@ -458,7 +478,7 @@ body {
 .form-group input:focus,
 .search-form input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
 }
 
 .form-group input::placeholder,
@@ -468,7 +488,7 @@ body {
 
 .form-select {
   padding: 0.625rem 0.875rem;
-  border: 1px solid var(--gray-300);
+  border: 2px solid var(--gray-200);
   border-radius: var(--radius-sm);
   font-size: 0.9375rem;
   color: var(--gray-800);
@@ -478,15 +498,24 @@ body {
   width: 100%;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23e94560' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  padding-right: 2.5rem;
+  background-position: right 0.875rem center;
+  padding-right: 2.75rem;
+  font-weight: 500;
+}
+
+.form-select:hover {
+  border-color: var(--gray-400);
 }
 
 .form-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+.form-select option:disabled {
+  color: var(--gray-400);
 }
 
 .form-textarea {
@@ -506,7 +535,7 @@ body {
 
 .form-textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
 }
 
 .form-textarea::placeholder {
@@ -645,8 +674,8 @@ body {
 }
 
 .status-analise {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
 .status-aprovado {
@@ -749,24 +778,63 @@ body {
 .login-page {
   min-height: 100vh;
   display: flex;
+}
+
+.login-image-panel {
+  flex: 1;
+  background-image: url('https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1400&auto=format&fit=crop&q=80');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.login-image-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(26,26,46,0.6) 0%, rgba(233,69,96,0.35) 100%);
+}
+
+.login-image-overlay {
+  position: absolute;
+  bottom: 3rem;
+  left: 3rem;
+  z-index: 1;
+  color: white;
+}
+
+.login-image-overlay h2 {
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.login-image-overlay p {
+  font-size: 1rem;
+  opacity: 0.85;
+  margin-top: 0.5rem;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.login-form-panel {
+  width: 480px;
+  min-width: 480px;
+  background: var(--bg-dark);
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
-  padding: 1.5rem;
+  padding: 3rem 2.5rem;
 }
 
 .login-card {
-  background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 2.5rem 2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .login-logo {
@@ -776,14 +844,15 @@ body {
 }
 
 .login-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  margin-bottom: 0.25rem;
+  font-family: var(--font-title);
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
 }
 
 .login-header p {
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
   font-size: 0.95rem;
 }
 
@@ -791,6 +860,30 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.login-form .form-group label {
+  color: rgba(255,255,255,0.75);
+}
+
+.login-form .input-icon input {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.login-form .input-icon input::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
+.login-form .input-icon input:focus {
+  border-color: var(--primary);
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 0 3px rgba(233,69,96,0.25);
+}
+
+.login-form .input-icon svg {
+  color: rgba(255,255,255,0.4);
 }
 
 .input-icon {
@@ -823,7 +916,17 @@ body {
   text-align: center;
   margin-top: 2rem;
   font-size: 0.8rem;
-  color: var(--gray-400);
+  color: rgba(255,255,255,0.3);
+}
+
+@media (max-width: 768px) {
+  .login-image-panel {
+    display: none;
+  }
+  .login-form-panel {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 /* ── Header User Info ───────────────────────────────── */

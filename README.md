@@ -478,11 +478,15 @@ Inicia na porta `8080`. Swagger UI disponivel em `http://localhost:8080/swagger-
 
 Apos subir o backend, registre os usuarios via `POST /api/v1/auth/registro`:
 
-```json
-{ "cpf": "33333333333", "senha": "123456", "perfil": "ADMIN"  }
-{ "cpf": "22222222222", "senha": "123456", "perfil": "AGENTE" }
-{ "cpf": "11111111111", "senha": "123456", "perfil": "CLIENTE" }
-```
+| Perfil  | Nome sugerido | Body (JSON) |
+|---------|-----------------|-------------|
+| ADMIN   | Dominic A       | `{ "cpf": "33333333333", "senha": "123456", "perfil": "ADMIN" }` |
+| AGENTE  | Han             | `{ "cpf": "22222222222", "senha": "123456", "perfil": "AGENTE" }` |
+| CLIENTE | Braian          | `{ "cpf": "11111111111", "senha": "123456", "perfil": "CLIENTE" }` |
+
+**Sincronizacao automatica no banco:** ao subir o backend, a aplicacao cria ou atualiza esses tres usuarios (senha padrao `123456`) e os respectivos cadastros de **cliente** com os nomes **Dominic A**, **Han** e **Braian**, desde que `seed.usuarios-demo.enabled` esteja `true` em `application.yml` (padrao). Para desativar em producao, defina `seed.usuarios-demo.enabled: false`.
+
+O endpoint de registro manual (`POST /api/v1/auth/registro`) continua sem campo nome; o seed e a alternativa para ja deixar usuario + cliente alinhados ao mesmo CPF.
 
 ### Usuarios de teste pre-cadastrados (banco Render)
 

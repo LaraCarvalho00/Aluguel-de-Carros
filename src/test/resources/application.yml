@@ -1,3 +1,7 @@
+seed:
+  usuarios-demo:
+    enabled: false
+
 micronaut:
   application:
     name: aluguel-de-carros-test

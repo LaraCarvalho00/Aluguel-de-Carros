@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import {
-  FiTruck,
   FiFileText,
   FiPlusCircle,
   FiUsers,
@@ -9,6 +8,7 @@ import {
   FiClipboard,
   FiCheckSquare,
 } from "react-icons/fi";
+import { MdDirectionsCar } from "react-icons/md";
 import { useAuth } from "../contexts/AuthContext";
 
 interface Card {
@@ -27,7 +27,7 @@ export default function Home() {
   const clienteCards: Card[] = [
     {
       to: "/automoveis",
-      icon: <FiTruck size={36} />,
+      icon: <MdDirectionsCar size={36} />,
       title: "Automóveis Disponíveis",
       description: "Veja os veículos disponíveis para alugar.",
     },
@@ -93,7 +93,7 @@ export default function Home() {
     },
     {
       to: "/automoveis",
-      icon: <FiTruck size={36} />,
+      icon: <MdDirectionsCar size={36} />,
       title: "Frota de Automóveis",
       description: "Gerencie todos os veículos cadastrados.",
     },
@@ -132,11 +132,13 @@ export default function Home() {
   };
 
   const perfil = user?.perfil ?? "";
+  const nomeExibicao =
+    user?.nome?.trim() || user?.cpf || "";
 
   return (
     <div className="home">
       <div className="hero">
-        <h1>Bem-vindo, {user?.cpf}</h1>
+        <h1>Bem-vindo, {nomeExibicao}</h1>
         <p>
           <strong>{perfilLabel[perfil] ?? perfil}</strong>&nbsp;—&nbsp;
           {perfilDesc[perfil] ?? ""}

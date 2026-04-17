@@ -27,53 +27,62 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      <div className="login-card">
-        <div className="login-header">
-          <span className="login-logo">🚗</span>
-          <h1>Aluguel de Carros</h1>
-          <p>Faça login para continuar</p>
+      <div className="login-image-panel">
+        <div className="login-image-overlay">
+          <h2>McQueen Car</h2>
+          <p>Sua jornada começa aqui.</p>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="cpf">CPF</label>
-            <div className="input-icon">
-              <FiUser />
-              <input
-                id="cpf"
-                type="text"
-                placeholder="000.000.000-00"
-                value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
-                required
-              />
-            </div>
+      <div className="login-form-panel">
+        <div className="login-card">
+          <div className="login-header">
+            <span className="login-logo">🏎️⚡</span>
+            <h1>McQueen Car</h1>
+            <p>Faça login para continuar</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="senha">Senha</label>
-            <div className="input-icon">
-              <FiLock />
-              <input
-                id="senha"
-                type="password"
-                placeholder="Sua senha"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-              />
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="cpf">CPF</label>
+              <div className="input-icon">
+                <FiUser />
+                <input
+                  id="cpf"
+                  type="text"
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            <FiLogIn />
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
+            <div className="form-group">
+              <label htmlFor="senha">Senha</label>
+              <div className="input-icon">
+                <FiLock />
+                <input
+                  id="senha"
+                  type="password"
+                  placeholder="Sua senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
-        <p className="login-footer">
-          PUC Minas — Laboratório de Desenvolvimento de Software
-        </p>
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+              <FiLogIn />
+              {loading ? "Entrando..." : "Entrar"}
+            </button>
+          </form>
+
+          <p className="login-footer">
+            PUC Minas — Laboratório de Desenvolvimento de Software
+          </p>
+        </div>
       </div>
     </div>
   );

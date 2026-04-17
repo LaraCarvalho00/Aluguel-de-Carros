@@ -100,7 +100,7 @@ export default function PedidoCreatePage() {
     return <div className="loading">Carregando dados...</div>;
 
   return (
-    <div className="page">
+    <div className="page-form-centered">
       <h1>Novo Pedido de Aluguel</h1>
       <form className="form" onSubmit={handleSubmit}>
         <div className="form-grid">

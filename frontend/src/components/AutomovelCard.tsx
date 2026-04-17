@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { FiEdit2, FiTrash2, FiTruck } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { MdDirectionsCar } from "react-icons/md";
 import type { AutomovelResponse } from "../types/automovel";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -17,7 +18,7 @@ export default function AutomovelCard({ automovel, onDelete }: Props) {
     <div className="card">
       <div className="card-header">
         <div className="card-avatar auto-avatar">
-          <FiTruck size={24} />
+          <MdDirectionsCar size={24} />
         </div>
         <div className="card-title">
           <h3>

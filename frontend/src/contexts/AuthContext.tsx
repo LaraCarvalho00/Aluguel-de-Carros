@@ -1,8 +1,11 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { clienteService } from "../services/api";
 
 interface AuthUser {
   cpf: string;
   perfil: string;
+  /** Preenchido quando existe cadastro de cliente com o mesmo CPF do usuário */
+  nome: string | null;
 }
 
 interface AuthContextType {
@@ -34,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!t) return null;
     const decoded = decodeJwt(t);
     if (!decoded) return null;
-    return { cpf: decoded.sub, perfil: decoded.roles[0] ?? "" };
+    return { cpf: decoded.sub, perfil: decoded.roles[0] ?? "", nome: null };
   });
 
   useEffect(() => {
@@ -44,6 +47,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("token");
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!token || !user?.cpf || user.nome != null) return;
+    let cancelled = false;
+    clienteService
+      .buscarPorCpf(user.cpf)
+      .then(({ data }) => {
+        if (!cancelled && data?.nome) {
+          setUser((prev) =>
+            prev && prev.cpf === user.cpf ? { ...prev, nome: data.nome } : prev
+          );
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [token, user?.cpf, user?.nome]);
 
   async function login(cpf: string, senha: string) {
     const response = await fetch("/api/v1/auth/login", {
@@ -63,7 +84,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!decoded) throw new Error("Token inválido");
 
     setToken(accessToken);
-    setUser({ cpf: decoded.sub, perfil: decoded.roles[0] ?? "" });
+    localStorage.setItem("token", accessToken);
+    let nome: string | null = null;
+    try {
+      const { data } = await clienteService.buscarPorCpf(decoded.sub);
+      nome = data.nome ?? null;
+    } catch {
+      nome = null;
+    }
+    setUser({
+      cpf: decoded.sub,
+      perfil: decoded.roles[0] ?? "",
+      nome,
+    });
   }
 
   function logout() {

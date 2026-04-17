@@ -1,11 +1,11 @@
 import {
   FiCalendar,
-  FiTruck,
   FiUser,
   FiXCircle,
   FiCheckCircle,
   FiClock,
 } from "react-icons/fi";
+import { MdDirectionsCar } from "react-icons/md";
 import type { PedidoResponse } from "../types/pedido";
 
 interface Props {
@@ -52,7 +52,7 @@ export default function PedidoCard({ pedido, onCancelar, onAvaliar }: Props) {
           <span className="value">{pedido.clienteNome}</span>
         </div>
         <div className="card-field">
-          <FiTruck size={14} />
+          <MdDirectionsCar size={14} />
           <span className="value">{pedido.automovelDescricao}</span>
         </div>
         <div className="card-field">

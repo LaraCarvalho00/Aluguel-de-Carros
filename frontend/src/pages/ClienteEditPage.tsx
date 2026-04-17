@@ -46,7 +46,7 @@ export default function ClienteEditPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page-form-centered">
       <h1>Editar Cliente</h1>
       <ClienteForm
         initialData={cliente}

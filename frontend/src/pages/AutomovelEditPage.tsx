@@ -44,7 +44,7 @@ export default function AutomovelEditPage() {
   if (fetching) return <div className="loading">Carregando...</div>;
 
   return (
-    <div className="page">
+    <div className="page-form-centered">
       <h1>Editar Automóvel</h1>
       <AutomovelForm
         initialData={automovel}
