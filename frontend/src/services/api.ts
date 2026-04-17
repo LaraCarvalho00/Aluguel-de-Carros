@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getApiBaseUrl } from "../config/apiBase";
 import type { ClienteRequest, ClienteResponse } from "../types/cliente";
 import type { AutomovelRequest, AutomovelResponse } from "../types/automovel";
 import type {
@@ -10,7 +11,7 @@ import type {
 } from "../types/pedido";
 
 const api = axios.create({
-  baseURL: "/api/v1",
+  baseURL: getApiBaseUrl(),
   headers: { "Content-Type": "application/json" },
 });
 

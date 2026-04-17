@@ -8,6 +8,25 @@ micronaut:
     name: aluguel-de-carros
   server:
     port: ${PORT:8080}
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowedOrigins:
+            - http://localhost:3000
+            - http://localhost:3001
+            - http://127.0.0.1:3000
+            - http://127.0.0.1:3001
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          allowedHeaders:
+            - Content-Type
+            - Authorization
   security:
     enabled: true
     authentication: bearer

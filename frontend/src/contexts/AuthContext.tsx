@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { getApiBaseUrl } from "../config/apiBase";
 import { clienteService } from "../services/api";
 
 interface AuthUser {
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token, user?.cpf, user?.nome]);
 
   async function login(cpf: string, senha: string) {
-    const response = await fetch("/api/v1/auth/login", {
+    const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: cpf, password: senha }),
